@@ -1,14 +1,30 @@
 package main
 
 import (
+	"context"
 	"fmt"
 	"log"
 	"net/http"
 	"os"
+	"os/signal"
 	"runtime"
+	"syscall"
+	"time"
 
 	"github.com/gin-gonic/gin"
 )
+
+var dummyPoll Poll = Poll{
+	Title:       "Test title",
+	Description: "Test description",
+	Location:    "Test location",
+	Options: []PollOption{
+		{
+			Start: time.Now(),
+			End:   time.Now().Add(10 * time.Hour),
+		},
+	},
+}
 
 func main() {
 	ConfigRuntime()
@@ -26,6 +42,13 @@ func ConfigRuntime() {
 func StartGin() {
 	gin.SetMode(gin.ReleaseMode)
 
+	db, err := NewDB()
+	if err != nil {
+		log.Fatal()
+	}
+
+	apiServer := NewAPIServer(db)
+
 	router := gin.New()
 	router.Use(gin.Recovery())
 	router.LoadHTMLGlob("resources/*.html")
@@ -37,28 +60,53 @@ func StartGin() {
 	router.StaticFile("/asset-manifest.json", "resources/asset-manifest.json")
 	router.StaticFile("/robots.txt", "resources/robots.txt")
 	router.GET("/", index)
-	router.GET("/api", api)
+	router.GET("/api/v1/poll", apiServer.listPolls)
+	router.POST("/api/v1/poll", apiServer.newPoll)
+	router.GET("/api/v1/poll/:id", apiServer.getPoll)
+	router.DELETE("/api/v1/poll/:id", apiServer.deletePoll)
 
 	port := os.Getenv("PORT")
 	if port == "" {
 		port = "8080"
 	}
-	if err := router.Run(":" + port); err != nil {
-		log.Panicf("error: %s", err)
+
+	srv := &http.Server{
+		Addr:    ":" + port,
+		Handler: router,
 	}
+
+	go func() {
+		if err := srv.ListenAndServe(); err != nil && err != http.ErrServerClosed {
+			log.Fatalf("listen: %s\n", err)
+		}
+	}()
+
+	// Wait for interrupt signal to gracefully shutdown the server with
+	// a timeout of 5 seconds.
+	quit := make(chan os.Signal)
+	// kill (no param) default send syscanll.SIGTERM
+	// kill -2 is syscall.SIGINT
+	// kill -9 is syscall. SIGKILL but can"t be catch, so don't need add it
+	signal.Notify(quit, syscall.SIGINT, syscall.SIGTERM)
+	<-quit
+	log.Println("Shutdown Server ...")
+
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+	if err := srv.Shutdown(ctx); err != nil {
+		log.Fatal("Server Shutdown:", err)
+	}
+	db.Close()
+	// catching ctx.Done(). timeout of 5 seconds.
+	select {
+	case <-ctx.Done():
+		log.Println("timeout of 5 seconds.")
+	}
+	log.Println("Server exiting")
+
 }
 
 func index(c *gin.Context) {
 	c.Status(http.StatusOK)
 	c.HTML(http.StatusOK, "index.html", nil)
-}
-
-type response struct {
-	Data string `json:"data"`
-}
-
-func api(c *gin.Context) {
-	c.Status(http.StatusOK)
-	c.Header("Content-Type", "application/json")
-	c.JSON(200, response{Data: "Hello World!"})
 }
