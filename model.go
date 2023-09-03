@@ -10,6 +10,10 @@ const (
 	Unavailable OptionAnswer = "unavailable"
 )
 
+var (
+	AllOptionAnswer []OptionAnswer = []OptionAnswer{Available, Maybe, Unavailable}
+)
+
 type OptionAvailability struct {
 	OptionID string       `json:"option_id"`
 	Answer   OptionAnswer `json:"answer"`

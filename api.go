@@ -3,11 +3,17 @@ package main
 import (
 	"database/sql"
 	"encoding/json"
+	"fmt"
 	"io"
-	"log"
 	"net/http"
+	"reflect"
+	"strings"
 
 	"github.com/gin-gonic/gin"
+	"github.com/rtfpessoa/timer-tamer/logger"
+	"go.uber.org/zap"
+	"golang.org/x/exp/slices"
+	goauth "google.golang.org/api/oauth2/v2"
 )
 
 type APIServer struct {
@@ -24,159 +30,177 @@ type response struct {
 	Data interface{} `json:"data"`
 }
 
-func (a *APIServer) newAccount(c *gin.Context) {
-	jsonData, err := io.ReadAll(c.Request.Body)
-	if err != nil {
-		log.Panicf("error: %s", err)
+func (a *APIServer) userInfo(ctx *gin.Context, accountID int64) {
+	var (
+		res goauth.Userinfo
+		ok  bool
+	)
+
+	if res, ok = ctx.Value("user").(goauth.Userinfo); !ok {
+		logger.Error("failed to retrieve user info")
+		ctx.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"error": "failed to retrieve user info"})
+		return
 	}
 
-	account := Account{}
-	err = json.Unmarshal(jsonData, &account)
-	if err != nil {
-		log.Panicf("error: %s", err)
-	}
-
-	id, err := NewAccount(c.Request.Context(), a.db, account)
-	if err != nil {
-		log.Panicf("error: %s", err)
-	}
-
-	c.Status(http.StatusOK)
-	c.Header("Content-Type", "application/json")
-	c.JSON(200, response{Data: id})
+	ctx.JSON(http.StatusOK, gin.H{"id": accountID, "email": res.Email})
 }
 
-func (a *APIServer) newPoll(c *gin.Context) {
-	accountID, err := GetAccountID(c.Request.Context())
-	if err != nil {
-		log.Panicf("error: %s", err)
-	}
+func (a *APIServer) googleCallback(c *gin.Context) {
+	c.Redirect(http.StatusFound, "/")
+}
 
-	jsonData, err := io.ReadAll(c.Request.Body)
+func (a *APIServer) newPoll(ctx *gin.Context, accountID int64) {
+	jsonData, err := io.ReadAll(ctx.Request.Body)
 	if err != nil {
-		log.Panicf("error: %s", err)
+		logger.Error("failed to read request body")
+		ctx.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": "invalid request payload"})
+		return
 	}
 
 	poll := Poll{}
 	err = json.Unmarshal(jsonData, &poll)
 	if err != nil {
-		log.Panicf("error: %s", err)
+		logger.Error("failed to parse request body", zap.String("body", string(jsonData)), zap.Any("error", err))
+		ctx.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": "invalid request payload"})
+		return
 	}
 
-	id, err := NewPoll(c.Request.Context(), a.db, accountID, poll)
+	createdPoll, err := NewPoll(ctx, a.db, accountID, poll)
 	if err != nil {
-		log.Panicf("error: %s", err)
+		ctx.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"error": "An unexpected error occurred"})
+		return
 	}
 
-	c.Status(http.StatusOK)
-	c.Header("Content-Type", "application/json")
-	c.JSON(200, response{Data: id})
+	ctx.Status(http.StatusOK)
+	ctx.Header("Content-Type", "application/json")
+	ctx.JSON(200, response{Data: createdPoll})
 }
 
-func (a *APIServer) listPolls(c *gin.Context) {
-	accountID, err := GetAccountID(c.Request.Context())
+func (a *APIServer) listPolls(ctx *gin.Context, accountID int64) {
+	polls, err := ListPolls(ctx, a.db, accountID)
 	if err != nil {
-		log.Panicf("error: %s", err)
+		ctx.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"error": "An unexpected error occurred"})
+		return
 	}
 
-	polls, err := ListPolls(c.Request.Context(), a.db, accountID)
-	if err != nil {
-		log.Panicf("error: %s", err)
-	}
-
-	c.Status(http.StatusOK)
-	c.Header("Content-Type", "application/json")
-	c.JSON(200, response{Data: polls})
+	ctx.Status(http.StatusOK)
+	ctx.Header("Content-Type", "application/json")
+	ctx.JSON(200, response{Data: polls})
 }
 
-func (a *APIServer) getPoll(c *gin.Context) {
-	pollID := c.Params.ByName("id")
-
-	log.Printf("PollID: %s\n", pollID)
-	poll, err := GetPoll(c.Request.Context(), a.db, pollID)
-	if err != nil {
-		log.Panicf("error: %s", err)
+func (a *APIServer) getPoll(ctx *gin.Context) {
+	pollID := ctx.Params.ByName("id")
+	if pollID == "" {
+		logger.Error("invalid poll id")
+		ctx.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": "invalid poll id"})
+		return
 	}
 
-	availabilities, err := ListVotes(c.Request.Context(), a.db, pollID)
+	poll, err := GetPoll(ctx, a.db, pollID)
 	if err != nil {
-		log.Panicf("error: %s", err)
+		ctx.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"error": "An unexpected error occurred"})
+		return
+	}
+	if reflect.ValueOf(poll).IsZero() {
+		ctx.AbortWithStatusJSON(http.StatusNotFound, gin.H{"error": "poll not found"})
+		return
 	}
 
-	c.Status(http.StatusOK)
-	c.Header("Content-Type", "application/json")
-	c.JSON(200, response{Data: map[string]interface{}{
+	availabilities, err := ListVotes(ctx, a.db, pollID)
+	if err != nil {
+		ctx.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"error": "An unexpected error occurred"})
+		return
+	}
+
+	ctx.Status(http.StatusOK)
+	ctx.Header("Content-Type", "application/json")
+	ctx.JSON(200, response{Data: map[string]interface{}{
 		"poll":           poll,
 		"availabilities": availabilities,
 	}})
 }
 
-func (a *APIServer) deletePoll(c *gin.Context) {
-	accountID, err := GetAccountID(c.Request.Context())
-	if err != nil {
-		log.Panicf("error: %s", err)
+func (a *APIServer) deletePoll(ctx *gin.Context, accountID int64) {
+	pollID := ctx.Params.ByName("id")
+	if pollID == "" {
+		logger.Error("invalid poll id")
+		ctx.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": "invalid poll id"})
+		return
 	}
 
-	pollID := c.Params.ByName("id")
-
-	poll, err := DeletePoll(c.Request.Context(), a.db, accountID, pollID)
+	poll, err := DeletePoll(ctx, a.db, accountID, pollID)
 	if err != nil {
-		log.Panicf("error: %s", err)
+		ctx.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"error": "An unexpected error occurred"})
+		return
 	}
 
-	c.Status(http.StatusOK)
-	c.Header("Content-Type", "application/json")
-	c.JSON(200, response{Data: poll})
+	ctx.Status(http.StatusOK)
+	ctx.Header("Content-Type", "application/json")
+	ctx.JSON(200, response{Data: poll})
 }
 
-func (a *APIServer) newVote(c *gin.Context) {
-	accountID, err := GetAccountID(c.Request.Context())
-	if err != nil {
-		log.Panicf("error: %s", err)
+func (a *APIServer) newVote(ctx *gin.Context, accountID int64) {
+	pollID := ctx.Params.ByName("id")
+	if pollID == "" {
+		logger.Error("invalid poll id")
+		ctx.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": "invalid poll id"})
+		return
 	}
 
-	pollID := c.Params.ByName("id")
-
-	jsonData, err := io.ReadAll(c.Request.Body)
+	jsonData, err := io.ReadAll(ctx.Request.Body)
 	if err != nil {
-		log.Panicf("error: %s", err)
+		logger.Error("failed to read request body")
+		ctx.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": "invalid request payload"})
+		return
 	}
 
 	availabilities := []OptionAvailability{}
 	err = json.Unmarshal(jsonData, &availabilities)
 	if err != nil {
-		log.Panicf("error: %s", err)
+		logger.Error("failed to parse request body", zap.String("body", string(jsonData)), zap.Any("error", err))
+		ctx.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": "invalid request payload"})
+		return
 	}
 
-	err = NewVote(c.Request.Context(), a.db, accountID, PollAccountAvailability{
+	for _, availability := range availabilities {
+		if !slices.Contains(AllOptionAnswer, availability.Answer) {
+			logger.Infof("invalid availability %s", availability.Answer)
+			ctx.AbortWithStatusJSON(http.StatusBadRequest,
+				gin.H{"error": fmt.Sprintf("invalid availability. needs to be one of: %s", strings.Join(AllOptionAnswer, ", "))})
+			return
+		}
+	}
+
+	pollAccountAvailability, err := NewVote(ctx, a.db, accountID, PollAccountAvailability{
 		PollID:         pollID,
-		AccountID:      1,
+		AccountID:      accountID,
 		Availabilities: availabilities,
 	})
 	if err != nil {
-		log.Panicf("error: %s", err)
+		ctx.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"error": "An unexpected error occurred"})
+		return
 	}
 
-	c.Status(http.StatusOK)
-	c.Header("Content-Type", "application/json")
-	c.JSON(200, response{Data: nil})
+	ctx.Status(http.StatusOK)
+	ctx.Header("Content-Type", "application/json")
+	ctx.JSON(200, response{Data: pollAccountAvailability})
 }
 
-func (a *APIServer) getVote(c *gin.Context) {
-	accountID, err := GetAccountID(c.Request.Context())
-	if err != nil {
-		log.Panicf("error: %s", err)
+func (a *APIServer) getVote(ctx *gin.Context, accountID int64) {
+	pollID := ctx.Params.ByName("id")
+	if pollID == "" {
+		logger.Error("invalid poll id")
+		ctx.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": "invalid poll id"})
+		return
 	}
 
-	pollID := c.Params.ByName("id")
-
-	log.Printf("PollID: %s\n", pollID)
-	pollAccountAvailability, err := GetVote(c.Request.Context(), a.db, accountID, pollID)
+	pollAccountAvailability, err := GetVote(ctx, a.db, accountID, pollID)
 	if err != nil {
-		log.Panicf("error: %s", err)
+		ctx.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"error": "An unexpected error occurred"})
+		return
 	}
 
-	c.Status(http.StatusOK)
-	c.Header("Content-Type", "application/json")
-	c.JSON(200, response{Data: pollAccountAvailability})
+	ctx.Status(http.StatusOK)
+	ctx.Header("Content-Type", "application/json")
+	ctx.JSON(200, response{Data: pollAccountAvailability})
 }
