@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"log"
 	"net/http"
@@ -13,18 +14,6 @@ import (
 
 	"github.com/gin-gonic/gin"
 )
-
-var dummyPoll Poll = Poll{
-	Title:       "Test title",
-	Description: "Test description",
-	Location:    "Test location",
-	Options: []PollOption{
-		{
-			Start: time.Now(),
-			End:   time.Now().Add(10 * time.Hour),
-		},
-	},
-}
 
 func main() {
 	ConfigRuntime()
@@ -51,6 +40,7 @@ func StartGin() {
 
 	router := gin.New()
 	router.Use(gin.Recovery())
+	router.Use(AuthMiddleware())
 	router.LoadHTMLGlob("resources/*.html")
 	router.Static("/static", "resources/static")
 	router.StaticFile("/favicon.ico", "resources/favicon.ico")
@@ -60,10 +50,13 @@ func StartGin() {
 	router.StaticFile("/asset-manifest.json", "resources/asset-manifest.json")
 	router.StaticFile("/robots.txt", "resources/robots.txt")
 	router.GET("/", index)
+	router.POST("/api/v1/account", apiServer.newAccount)
 	router.GET("/api/v1/poll", apiServer.listPolls)
 	router.POST("/api/v1/poll", apiServer.newPoll)
 	router.GET("/api/v1/poll/:id", apiServer.getPoll)
 	router.DELETE("/api/v1/poll/:id", apiServer.deletePoll)
+	router.POST("/api/v1/poll/:id/vote", apiServer.newVote)
+	router.GET("/api/v1/poll/:id/vote", apiServer.getVote)
 
 	port := os.Getenv("PORT")
 	if port == "" {
@@ -109,4 +102,29 @@ func StartGin() {
 func index(c *gin.Context) {
 	c.Status(http.StatusOK)
 	c.HTML(http.StatusOK, "index.html", nil)
+}
+
+const ACCOUNT_ID_KEY = "ACCOUNT_ID"
+
+const DEFAULT_USER_ID = 1
+
+func AuthMiddleware() gin.HandlerFunc {
+	return func(c *gin.Context) {
+		c.Set(ACCOUNT_ID_KEY, DEFAULT_USER_ID)
+
+		c.Next()
+	}
+}
+
+func GetAccountID(ctx context.Context) (int64, error) {
+	value := ctx.Value(ACCOUNT_ID_KEY)
+	if value == nil {
+		return -1, errors.New("Missing account in request")
+	}
+
+	if v, ok := value.(int64); ok {
+		return v, nil
+	}
+
+	return -1, errors.New("Wrong account type")
 }
