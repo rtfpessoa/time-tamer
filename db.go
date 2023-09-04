@@ -13,7 +13,7 @@ import (
 )
 
 func NewDB(ctx context.Context) (*sql.DB, error) {
-	sqlDB, err := sql.Open("postgres", os.Getenv("DATABASE_URL")+"&application_name=time-tamer")
+	sqlDB, err := sql.Open("postgres", os.Getenv("DATABASE_URL")+"&application_name=roodle")
 	if err != nil {
 		logger.Error("failed to open database connection", zap.Error(err))
 		return nil, err

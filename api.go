@@ -9,6 +9,7 @@ import (
 	"reflect"
 	"strings"
 
+	"github.com/gin-contrib/sessions"
 	"github.com/gin-gonic/gin"
 	"github.com/rtfpessoa/timer-tamer/logger"
 	"go.uber.org/zap"
@@ -45,8 +46,21 @@ func (a *APIServer) userInfo(ctx *gin.Context, accountID int64) {
 	ctx.JSON(http.StatusOK, gin.H{"id": accountID, "email": res.Email})
 }
 
-func (a *APIServer) googleCallback(c *gin.Context) {
-	c.Redirect(http.StatusFound, "/")
+func (a *APIServer) googleCallback(ctx *gin.Context) {
+	session := sessions.Default(ctx)
+	fromValue := session.Get(redirectKey)
+
+	session.Delete(redirectKey)
+	if err := session.Save(); err != nil {
+		logger.Warn("failed to save session", zap.Error(err))
+	}
+
+	if from, ok := fromValue.(string); ok {
+		ctx.Redirect(http.StatusFound, from)
+		return
+	}
+
+	ctx.Redirect(http.StatusFound, "/")
 }
 
 func (a *APIServer) newPoll(ctx *gin.Context, accountID int64) {

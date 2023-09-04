@@ -21,7 +21,7 @@ import (
 )
 
 const (
-	redirectURL = "https://time-tamer.onrender.com/auth/google/callback"
+	redirectURL = "https://roodle.onrender.com/auth/google/callback"
 	credFile    = "clientid.google.json"
 	sessionName = "gin_session"
 )

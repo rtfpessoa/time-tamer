@@ -9,6 +9,7 @@ import (
 	"fmt"
 	"net/http"
 	"os"
+	"strings"
 
 	"github.com/gin-contrib/sessions"
 	"github.com/gin-contrib/sessions/cookie"
@@ -29,8 +30,9 @@ type Credentials struct {
 }
 
 const (
-	stateKey  = "state"
-	sessionID = "ginoauth_google_session"
+	stateKey    = "state"
+	redirectKey = "redirect"
+	sessionID   = "ginoauth_google_session"
 )
 
 var (
@@ -72,10 +74,23 @@ func Session(name string) gin.HandlerFunc {
 }
 
 func LoginHandler(ctx *gin.Context) {
-	stateValue := randomAlphanumeric(32)
 	session := sessions.Default(ctx)
+
+	from := ctx.Request.URL.Query().Get("from")
+	if from != "" && strings.HasPrefix(from, "/") {
+		session.Set(redirectKey, from)
+	} else {
+		logger.Warn("invalid from parameter", zap.String("from", from))
+	}
+
+	stateValue := randomAlphanumeric(12)
 	session.Set(stateKey, stateValue)
-	session.Save()
+
+	if err := session.Save(); err != nil {
+		logger.Error("failed to save session", zap.Error(err))
+		ctx.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"error": "failed to save session"})
+		return
+	}
 
 	url := GetLoginURL(stateValue)
 	ctx.Redirect(http.StatusFound, url)
