@@ -4,6 +4,9 @@ export type PollListResponse = {
 
 export type Poll = {
   id: string;
+  title?: string;
+  description?: string;
+  location?: string;
   options: Option[];
 };
 
@@ -11,6 +14,10 @@ export type Option = {
   id: string;
   start: Date;
   end: Date;
+};
+
+export type NewPollResponse = {
+  data: Poll;
 };
 
 export type PollGetResponse = {
@@ -25,10 +32,15 @@ export type PollWithAvailabilities = {
 export type PollAccountAvailability = {
   poll_id: string;
   account_id: number;
+  account_email: string;
   availabilities: Answer[];
 };
 
 export type Answer = {
   option_id: string;
   answer: string;
+};
+
+export type ResponseError = {
+  error: string;
 };

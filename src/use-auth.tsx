@@ -1,3 +1,4 @@
+import { Box, Button, Stack, Title } from "@mantine/core";
 import React from "react";
 import { useState, useEffect } from "react";
 import { useLocation } from "react-router-dom";
@@ -60,18 +61,40 @@ export function RequireAuth({ children }: { children: JSX.Element }) {
   let auth = useAuth();
   let location = useLocation();
 
-  if (auth.loading) {
-    return <div>Loading...</div>;
-  }
-
   if (!auth.isAuthenticated) {
     return (
-      <div>
-        <span>
-          This page requires authentication. Please{" "}
-          <a href={`/login?from=${location.pathname}`}>Log in</a>
-        </span>
-      </div>
+      <Box className="App">
+        <header className="App-header">
+          <img
+            src="/static/images/logo-face.png"
+            className="App-logo"
+            alt="logo"
+          />
+          {auth.loading ? (
+            <Box>
+              <Title size="h2" color="#94bdb7">
+                Loading...
+              </Title>
+            </Box>
+          ) : (
+            <Stack>
+              <Title size="h2" color="#94bdb7">
+                This page requires authentication
+              </Title>
+              <Box>
+                <Button
+                  variant="white"
+                  onClick={() =>
+                    (window.location.href = `/login?from=${location.pathname}`)
+                  }
+                >
+                  Log in
+                </Button>
+              </Box>
+            </Stack>
+          )}
+        </header>
+      </Box>
     );
   }
 

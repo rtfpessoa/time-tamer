@@ -22,6 +22,7 @@ type OptionAvailability struct {
 type PollAccountAvailability struct {
 	PollID         string               `json:"poll_id"`
 	AccountID      int64                `json:"account_id"`
+	AccountEmail   string               `json:"account_email"`
 	Availabilities []OptionAvailability `json:"availabilities"`
 }
 

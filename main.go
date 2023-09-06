@@ -86,6 +86,7 @@ func StartServer() error {
 	router.NoRoute(index)
 	router.GET("/", index)
 	router.GET("/login", LoginHandler)
+	router.GET("/logout", LogoutHandler)
 
 	authRouter := router.Group("/auth")
 	authRouter.Use(Auth())

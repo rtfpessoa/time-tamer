@@ -10,6 +10,8 @@ import PollList from "./PollList";
 import NewVote, { newVoteLoader } from "./NewVote";
 import NewPoll from "./NewPoll";
 import { AuthProvider, RequireAuth } from "./use-auth";
+import { Box, MantineProvider } from "@mantine/core";
+import { Header } from "./header";
 
 const root = ReactDOM.createRoot(
   document.getElementById("root") as HTMLElement
@@ -18,33 +20,47 @@ const root = ReactDOM.createRoot(
 const router = createBrowserRouter([
   {
     path: "/",
-    element: <App />,
+    element: (
+      <Box>
+        <Header />
+        <App />
+      </Box>
+    ),
     errorElement: <ErrorPage />,
   },
   {
     path: "/poll",
     element: (
-      <RequireAuth>
-        <PollList />
-      </RequireAuth>
+      <Box pb={"xl"}>
+        <Header />
+        <RequireAuth>
+          <PollList />
+        </RequireAuth>
+      </Box>
     ),
     errorElement: <ErrorPage />,
   },
   {
     path: "/poll/new",
     element: (
-      <RequireAuth>
-        <NewPoll />
-      </RequireAuth>
+      <Box pb={"xl"}>
+        <Header />
+        <RequireAuth>
+          <NewPoll />
+        </RequireAuth>
+      </Box>
     ),
     errorElement: <ErrorPage />,
   },
   {
     path: "/poll/:pollId",
     element: (
-      <RequireAuth>
-        <PollGet />
-      </RequireAuth>
+      <Box pb={"xl"}>
+        <Header />
+        <RequireAuth>
+          <PollGet />
+        </RequireAuth>
+      </Box>
     ),
     errorElement: <ErrorPage />,
     loader: pollGetLoader,
@@ -52,9 +68,12 @@ const router = createBrowserRouter([
   {
     path: "/poll/:pollId/vote",
     element: (
-      <RequireAuth>
-        <NewVote />
-      </RequireAuth>
+      <Box pb={"xl"}>
+        <Header />
+        <RequireAuth>
+          <NewVote />
+        </RequireAuth>
+      </Box>
     ),
     errorElement: <ErrorPage />,
     loader: newVoteLoader,
@@ -63,9 +82,11 @@ const router = createBrowserRouter([
 
 root.render(
   <React.StrictMode>
-    <AuthProvider>
-      <RouterProvider router={router} />
-    </AuthProvider>
+    <MantineProvider withGlobalStyles withNormalizeCSS>
+      <AuthProvider>
+        <RouterProvider router={router} />
+      </AuthProvider>
+    </MantineProvider>
   </React.StrictMode>
 );
 

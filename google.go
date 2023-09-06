@@ -97,6 +97,22 @@ func LoginHandler(ctx *gin.Context) {
 	return
 }
 
+func LogoutHandler(ctx *gin.Context) {
+	session := sessions.Default(ctx)
+
+	session.Delete(sessionID)
+	session.Delete(SESSION_ACCOUNT_ID)
+
+	if err := session.Save(); err != nil {
+		logger.Error("failed to save session", zap.Error(err))
+		ctx.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"error": "failed to save session"})
+		return
+	}
+
+	ctx.Redirect(http.StatusFound, "/")
+	return
+}
+
 func GetLoginURL(state string) string {
 	return conf.AuthCodeURL(state)
 }

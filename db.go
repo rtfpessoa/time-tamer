@@ -287,7 +287,9 @@ func DeletePoll(ctx context.Context, db *sql.DB, accountID int64, pollID string)
 func NewVote(ctx context.Context, db *sql.DB, accountID int64, vote PollAccountAvailability) (PollAccountAvailability, error) {
 	sqlStatement := `
 INSERT INTO poll_account_availability (account_id, poll_id, availabilities)
-VALUES ($1, $2, $3);`
+VALUES ($1, $2, $3)
+ON CONFLICT (account_id, poll_id)
+DO UPDATE SET availabilities = EXCLUDED.availabilities;`
 	marshaledAvailabilities, err := json.Marshal(vote.Availabilities)
 	if err != nil {
 		logger.Error("failed to marshal vote availabilities", zap.Error(err))
@@ -343,8 +345,8 @@ func GetVote(ctx context.Context, db *sql.DB, accountID int64, pollID string) (P
 }
 
 func ListVotes(ctx context.Context, db *sql.DB, pollID string) ([]PollAccountAvailability, error) {
-	sqlStatement := `SELECT account_id, jsonb_pretty(availabilities) AS availabilities
-		FROM poll_account_availability
+	sqlStatement := `SELECT account_id, email, jsonb_pretty(availabilities) AS availabilities
+		FROM poll_account_availability INNER JOIN accounts ON poll_account_availability.account_id = accounts.id
 		WHERE poll_id = $1;`
 
 	rows, err := db.QueryContext(ctx, sqlStatement, pollID)
@@ -357,8 +359,9 @@ func ListVotes(ctx context.Context, db *sql.DB, pollID string) ([]PollAccountAva
 	pollAccountAvailabilities := []PollAccountAvailability{}
 	for rows.Next() {
 		var accountID int64
+		var email string
 		var availabilities string
-		err = rows.Scan(&accountID, &availabilities)
+		err = rows.Scan(&accountID, &email, &availabilities)
 		if err := rows.Err(); err != nil {
 			logger.Error("failed to read vote fields", zap.Error(err))
 			continue
@@ -374,6 +377,7 @@ func ListVotes(ctx context.Context, db *sql.DB, pollID string) ([]PollAccountAva
 		pollAccountAvailabilities = append(pollAccountAvailabilities, PollAccountAvailability{
 			PollID:         pollID,
 			AccountID:      accountID,
+			AccountEmail:   email,
 			Availabilities: optionAvailabilities,
 		})
 	}
