@@ -12,6 +12,9 @@ import (
 	"syscall"
 	"time"
 
+	gintrace "gopkg.in/DataDog/dd-trace-go.v1/contrib/gin-gonic/gin"
+	"gopkg.in/DataDog/dd-trace-go.v1/ddtrace/tracer"
+
 	"github.com/gin-contrib/sessions"
 	"github.com/gin-gonic/gin"
 	"github.com/rtfpessoa/timer-tamer/logger"
@@ -22,7 +25,6 @@ import (
 
 const (
 	redirectURL = "https://roodle.onrender.com/auth/google/callback"
-	credFile    = "clientid.google.json"
 	sessionName = "gin_session"
 )
 
@@ -47,6 +49,19 @@ func ConfigRuntime() {
 
 func StartServer() error {
 	ctx := context.Background()
+
+	tracer.Start(
+		tracer.WithSamplingRules([]tracer.SamplingRule{tracer.RateRule(1)}),
+		tracer.WithService("roodle"),
+		tracer.WithEnv("prod"),
+		tracer.WithAgentAddr("localhost:8126"),
+		tracer.WithDebugMode(true),
+		tracer.WithDebugStack(true),
+		tracer.WithTraceEnabled(true),
+		tracer.WithAnalytics(true),
+	)
+	defer tracer.Stop()
+
 	gin.SetMode(gin.ReleaseMode)
 
 	cookieSecretStr := os.Getenv("COOKIE_SECRET")
@@ -54,6 +69,11 @@ func StartServer() error {
 		return errors.New("missing COOKIE_SECRET environment variable")
 	}
 	cookieSecret = []byte(cookieSecretStr)
+
+	credFile := os.Getenv("OAUTH2_GOOGLE_CREDENTIALS_FILE")
+	if credFile == "" {
+		return errors.New("missing OAUTH2_GOOGLE_CREDENTIALS_FILE environment variable")
+	}
 
 	db, err := NewDB(ctx)
 	if err != nil {
@@ -73,6 +93,7 @@ func StartServer() error {
 		logger.Error("recovery from panic", zap.Any("error", err))
 		c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"error": "An unexpected error occurred"})
 	}))
+	router.Use(gintrace.Middleware("roodle"))
 	router.Use(Session(sessionName))
 
 	router.LoadHTMLGlob("resources/*.html")

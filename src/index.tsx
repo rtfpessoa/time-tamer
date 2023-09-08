@@ -13,6 +13,26 @@ import { AuthProvider, RequireAuth } from "./use-auth";
 import { Box, MantineProvider } from "@mantine/core";
 import { Header } from "./header";
 
+import { datadogRum } from "@datadog/browser-rum";
+
+datadogRum.init({
+  applicationId: "3946deb5-0bfd-4d76-af57-3c04904340f4",
+  clientToken: "pub6b8c573520c7b6b090e1b91d4e9ca41c",
+  site: "datadoghq.eu",
+  service: "roodle-ui",
+  env: "prod",
+  // Specify a version number to identify the deployed version of your application in Datadog
+  // version: '1.0.0',
+  sessionSampleRate: 100,
+  sessionReplaySampleRate: 20,
+  trackUserInteractions: true,
+  trackResources: true,
+  trackLongTasks: true,
+  defaultPrivacyLevel: "mask-user-input",
+});
+
+datadogRum.startSessionReplayRecording();
+
 const root = ReactDOM.createRoot(
   document.getElementById("root") as HTMLElement
 );

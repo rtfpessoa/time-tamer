@@ -52,6 +52,7 @@
     ]
   },
   "devDependencies": {
+    "@datadog/browser-rum": "^4.48.2",
     "clipboardy": "^3.0.0",
     "localforage": "^1.10.0",
     "match-sorter": "^6.3.1",

@@ -1263,6 +1263,26 @@
   resolved "https://registry.yarnpkg.com/@csstools/selector-specificity/-/selector-specificity-2.2.0.tgz#2cbcf822bf3764c9658c4d2e568bd0c0cb748016"
   integrity sha512-+OJ9konv95ClSTOJCmMZqpd5+YGsB2S+x6w3E1oaM8UuR5j8nTNHYSz8c9BEPGDOCMQYIEEGlVPj/VY64iTbGw==
 
+"@datadog/browser-core@4.48.2":
+  version "4.48.2"
+  resolved "https://registry.yarnpkg.com/@datadog/browser-core/-/browser-core-4.48.2.tgz#6606878660a2dad528a7c5c4aa5465169cb2c33a"
+  integrity sha512-ewQDLouh9jymJPTRq5M8Hz0FFzMaVlJCwHHY5gMUmGyIaBEzS8wd3AeZ56kQ32ZOcyz83au1/yZ/zcIB8LDoyA==
+
+"@datadog/browser-rum-core@4.48.2":
+  version "4.48.2"
+  resolved "https://registry.yarnpkg.com/@datadog/browser-rum-core/-/browser-rum-core-4.48.2.tgz#4fc13aedc6170d51c3c024327da27af937fd0186"
+  integrity sha512-LUlaYAC7MGXZbIPT6LvSVxaZBG0irer+meQp1LfJBdSy/lLb4OrNowrc9dcHeh4Fw9rNNLWl2Pz+4dBqRtR87g==
+  dependencies:
+    "@datadog/browser-core" "4.48.2"
+
+"@datadog/browser-rum@^4.48.2":
+  version "4.48.2"
+  resolved "https://registry.yarnpkg.com/@datadog/browser-rum/-/browser-rum-4.48.2.tgz#95ab72a0fd6b9f82b69cca6a351d9a91bcd8d5da"
+  integrity sha512-SGxjKJLUJq8AjWedhHTQicIr4rvAcDMwBr6gHvZr3h9llCBpDxPzd/RPKCK69HMxBGt/Cw7KCpjAjy9IaCURWQ==
+  dependencies:
+    "@datadog/browser-core" "4.48.2"
+    "@datadog/browser-rum-core" "4.48.2"
+
 "@emotion/babel-plugin@^11.11.0":
   version "11.11.0"
   resolved "https://registry.yarnpkg.com/@emotion/babel-plugin/-/babel-plugin-11.11.0.tgz#c2d872b6a7767a9d176d007f5b31f7d504bb5d6c"
