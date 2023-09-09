@@ -8,6 +8,6 @@ sed -i 's/# env: <environment name>/env: prod/g' /etc/datadog-agent/datadog.yaml
 
 mkdir -p /var/log/roodle
 
-service datadog-agent start
+service datadog-agent start || (cat /var/log/datadog/agent.log && exit 1)
 
 /app/bin/app
