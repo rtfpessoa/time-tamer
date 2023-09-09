@@ -1,5 +1,11 @@
 import { useEffect, useState } from "react";
-import { PollGetResponse, PollWithAvailabilities } from "./models";
+import {
+  NewPollResponse,
+  Poll,
+  PollGetResponse,
+  PollWithAvailabilities,
+  ResponseError,
+} from "./models";
 import { LoaderFunction, useLoaderData, useNavigate } from "react-router-dom";
 import {
   Button,
@@ -11,12 +17,14 @@ import {
   CopyButton,
   Box,
   Card,
+  Modal,
 } from "@mantine/core";
 import { ClipboardIcon } from "./PollList";
 import dayjs from "dayjs";
 
 import Avatar from "react-avatar";
 import { capitalize } from "./utils";
+import { useDisclosure } from "@mantine/hooks";
 
 export function DescriptionIcon(props: React.ComponentPropsWithoutRef<"svg">) {
   const { width, height, style, ...others } = props;
@@ -69,6 +77,8 @@ function PollGet() {
   const { pollId } = useLoaderData() as { pollId: string };
   const [poll, setPoll] = useState<PollWithAvailabilities | null>(null);
   const navigate = useNavigate();
+  const [opened, { open, close }] = useDisclosure(false);
+  const [error, setError] = useState("");
 
   useEffect(() => {
     getPoll(pollId).then((poll) => setPoll(poll));
@@ -271,6 +281,64 @@ function PollGet() {
             </Stack>
           </Stack>
         ))}
+        <Box>
+          <Button
+            style={{ display: "flex", flexGrow: 0 }}
+            size="md"
+            onClick={open}
+          >
+            Delete
+          </Button>
+          <Modal
+            opened={opened}
+            onClose={close}
+            title="Deletion confirmation"
+            size="lg"
+          >
+            <Stack>
+              <Group>
+                <Text>
+                  Are you sure you want to delete{" "}
+                  <Text span weight={900}>
+                    {poll.poll.title || poll.poll.id}
+                  </Text>{" "}
+                  poll?
+                </Text>
+              </Group>
+              <Group>
+                <Button
+                  type="submit"
+                  color="red"
+                  onClick={async () => {
+                    setError("");
+                    try {
+                      const response = await deletePoll(poll.poll.id);
+
+                      if ("error" in response) {
+                        setError(response.error);
+                        return;
+                      }
+
+                      if ("id" in response) {
+                        navigate(`/poll`);
+                        return;
+                      }
+                    } catch (e) {
+                      setError("Something went wrong. Please try again.");
+                      return;
+                    }
+                  }}
+                >
+                  Yes
+                </Button>
+                <Button variant="default" onClick={close} type="reset">
+                  Cancel
+                </Button>
+                {error ? <Text color="red">{error}</Text> : null}
+              </Group>
+            </Stack>
+          </Modal>
+        </Box>
       </Stack>
     </Container>
   );
@@ -301,6 +369,35 @@ async function getPoll(id: string): Promise<PollWithAvailabilities | null> {
   poll.data.poll.options = options;
 
   return poll.data;
+}
+
+async function deletePoll(id: string): Promise<Poll | ResponseError> {
+  var response = await fetch(`/api/v1/poll/${id}`, {
+    method: "DELETE",
+    headers: {
+      "Content-Type": "application/json",
+    },
+  });
+
+  const obj = await response.json();
+
+  if (!response.ok) {
+    return obj as ResponseError;
+  }
+
+  const newPollResponse = obj as NewPollResponse;
+
+  const options = newPollResponse.data.options.map((option) => {
+    return {
+      id: option.id,
+      start: new Date(option.start),
+      end: new Date(option.end),
+    };
+  });
+
+  newPollResponse.data.options = options;
+
+  return newPollResponse.data;
 }
 
 export default PollGet;
