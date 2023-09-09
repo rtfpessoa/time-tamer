@@ -1,6 +1,8 @@
 package logger
 
 import (
+	"os"
+
 	"go.uber.org/zap"
 )
 
@@ -9,6 +11,11 @@ var zapLog *zap.Logger
 func init() {
 	var err error
 	config := zap.NewProductionConfig()
+
+	if os.Getenv("LOGGER_FILE") != "" {
+		config.OutputPaths = []string{"stderr", os.Getenv("LOGGER_FILE")}
+		config.ErrorOutputPaths = []string{"stderr", os.Getenv("LOGGER_FILE")}
+	}
 
 	zapLog, err = config.Build(zap.AddCallerSkip(1))
 	if err != nil {

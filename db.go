@@ -269,8 +269,9 @@ func DeletePoll(ctx context.Context, db *sql.DB, accountID int64, pollID string)
 	pollOptions := []PollOption{}
 	err = json.Unmarshal([]byte(options), &pollOptions)
 	if err != nil {
-		logger.Error("failed to unmarshal poll options", zap.Error(err))
-		return Poll{}, err
+		// Poll already deleted at this point so makes no sense to return an error to the user
+		// Just logging the error for debug purposes
+		logger.Error("failed to unmarshal poll options", zap.Any("options", options), zap.Error(err))
 	}
 
 	return Poll{

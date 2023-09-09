@@ -188,103 +188,115 @@ function PollGet() {
             </Group>
           ) : null}
         </Stack>
-        {poll.poll.options.map((option) => (
-          <Stack>
+        {poll.poll.options
+          .sort((option1, option2) => {
+            const option1Score = scoreAnswers(answers.get(option1.id) ?? []);
+            const option2Score = scoreAnswers(answers.get(option2.id) ?? []);
+
+            if (option1Score !== option2Score) {
+              return option1Score - option2Score;
+            }
+
+            return option2.start.getTime() - option1.start.getTime();
+          })
+          .reverse()
+          .map((option) => (
             <Stack>
-              <Card withBorder radius="md" p={"sm"}>
-                <Group spacing={"xs"}>
-                  <Text size="xl">
-                    {dayjs(option.start).format("ddd D MMM")}
-                  </Text>
-                  <Text>
-                    {dayjs(option.start).format("h:mm A")}
-                    {" - "}
-                    {dayjs(option.end).format("h:mm A")}
-                  </Text>
-                </Group>
-                <Group
-                  style={{
-                    display: "grid",
-                    gridTemplateColumns: "repeat(3, 1fr)",
-                  }}
-                >
-                  {Array.from(
-                    (answers.get(option.id) ?? []).reduce(
-                      (group, { answer, email }) => {
-                        return group.set(
-                          answer,
-                          (group.get(answer) ?? []).concat(email)
-                        );
-                      },
-                      new Map<string, string[]>()
+              <Stack>
+                <Card withBorder radius="md" p={"sm"}>
+                  <Group spacing={"xs"}>
+                    <Text size="xl">
+                      {dayjs(option.start).format("ddd D MMM")}
+                    </Text>
+                    <Text>
+                      {dayjs(option.start).format("h:mm A")}
+                      {" - "}
+                      {dayjs(option.end).format("h:mm A")}
+                    </Text>
+                  </Group>
+                  <Group
+                    style={{
+                      display: "grid",
+                      gridTemplateColumns: "repeat(3, 1fr)",
+                    }}
+                  >
+                    {Array.from(
+                      (answers.get(option.id) ?? []).reduce(
+                        (group, { answer, email }) => {
+                          return group.set(
+                            answer,
+                            (group.get(answer) ?? []).concat(email)
+                          );
+                        },
+                        new Map<string, string[]>()
+                      )
                     )
-                  )
-                    .sort(([answer1], [answer2]) =>
-                      answer1.localeCompare(answer2)
-                    )
-                    .map(([answer, values]) => (
-                      <Box
-                        style={{
-                          display: "flex",
-                          flexDirection: "column",
-                          overflow: "hidden",
-                        }}
-                      >
-                        <Text>
-                          {capitalize(answer)}: {values.length}
-                        </Text>
-                        <Group
-                          spacing="0px"
+                      .sort(([answer1], [answer2]) =>
+                        answer1.localeCompare(answer2)
+                      )
+                      .map(([answer, values]) => (
+                        <Box
                           style={{
                             display: "flex",
-                            flexDirection: "row",
-                            flexWrap: "nowrap",
+                            flexDirection: "column",
                             overflow: "hidden",
                           }}
                         >
-                          {values.slice(0, 4).map((email, idx) => (
-                            <Avatar
-                              email={email}
-                              round
-                              size="40px"
-                              style={{
-                                flexShrink: 0,
-                                border: "2px solid #fff",
-                                boxSizing: "content-box",
-                                marginLeft: `-${idx === 0 ? 0 : 20}px`,
-                              }}
-                            />
-                          ))}
-                          {values.length > 4 ? (
-                            <Box
-                              style={{
-                                display: "flex",
-                                flexShrink: 0,
-                                alignContent: "center",
-                                alignItems: "center",
-                                justifyContent: "center",
-                                width: "40px",
-                                height: "40px",
-                                borderRadius: "100%",
-                                marginLeft: "-20px",
-                                backgroundColor: "#94bdb7",
-                                border: "2px solid #fff",
-                                boxSizing: "content-box",
-                              }}
-                            >
-                              <Text size="xs" color="#1d2f2c">
-                                +{values.length - 4}
-                              </Text>
-                            </Box>
-                          ) : null}
-                        </Group>
-                      </Box>
-                    ))}
-                </Group>
-              </Card>
+                          <Text>
+                            {capitalize(answer)}: {values.length}
+                          </Text>
+                          <Group
+                            spacing="0px"
+                            style={{
+                              display: "flex",
+                              flexDirection: "row",
+                              flexWrap: "nowrap",
+                              overflow: "hidden",
+                            }}
+                          >
+                            {values.slice(0, 4).map((email, idx) => (
+                              <Avatar
+                                email={email}
+                                round
+                                size="40px"
+                                style={{
+                                  flexShrink: 0,
+                                  border: "2px solid #fff",
+                                  boxSizing: "content-box",
+                                  marginLeft: `-${idx === 0 ? 0 : 20}px`,
+                                }}
+                              />
+                            ))}
+                            {values.length > 4 ? (
+                              <Box
+                                style={{
+                                  display: "flex",
+                                  flexShrink: 0,
+                                  alignContent: "center",
+                                  alignItems: "center",
+                                  justifyContent: "center",
+                                  width: "40px",
+                                  height: "40px",
+                                  borderRadius: "100%",
+                                  marginLeft: "-20px",
+                                  backgroundColor: "#94bdb7",
+                                  border: "2px solid #fff",
+                                  boxSizing: "content-box",
+                                }}
+                              >
+                                <Text size="xs" color="#1d2f2c">
+                                  +{values.length - 4}
+                                </Text>
+                              </Box>
+                            ) : null}
+                          </Group>
+                        </Box>
+                      ))}
+                  </Group>
+                </Card>
+              </Stack>
             </Stack>
-          </Stack>
-        ))}
+          ))}
         <Box>
           <Button
             style={{ display: "flex", flexGrow: 0 }}
@@ -348,7 +360,9 @@ function PollGet() {
   );
 }
 
-export async function getPoll(id: string): Promise<PollWithAvailabilities | null> {
+export async function getPoll(
+  id: string
+): Promise<PollWithAvailabilities | null> {
   var response = await fetch(`/api/v1/poll/${id}`, {
     method: "GET",
     headers: {
@@ -405,3 +419,18 @@ export async function deletePoll(id: string): Promise<Poll | ResponseError> {
 }
 
 export default PollGet;
+
+function scoreAnswers(answers: EmailAnswer[]): number {
+  return answers.reduce((score, { answer }) => {
+    switch (answer) {
+      case "available":
+        return score + 3;
+      case "maybe":
+        return score + 1;
+      case "unavailable":
+        return score - 3;
+      default:
+        return score;
+    }
+  }, 0);
+}

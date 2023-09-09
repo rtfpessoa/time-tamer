@@ -55,10 +55,10 @@ func StartServer() error {
 		tracer.WithService("roodle"),
 		tracer.WithEnv("prod"),
 		tracer.WithAgentAddr("localhost:8126"),
-		tracer.WithDebugMode(true),
-		tracer.WithDebugStack(true),
-		tracer.WithTraceEnabled(true),
+		// tracer.WithDebugMode(true),
+		// tracer.WithDebugStack(true),
 		tracer.WithAnalytics(true),
+		tracer.WithTraceEnabled(true),
 	)
 	defer tracer.Stop()
 
