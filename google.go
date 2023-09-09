@@ -77,10 +77,12 @@ func LoginHandler(ctx *gin.Context) {
 	session := sessions.Default(ctx)
 
 	from := ctx.Request.URL.Query().Get("from")
-	if from != "" && strings.HasPrefix(from, "/") {
-		session.Set(redirectKey, from)
-	} else {
-		logger.Warn("invalid from parameter", zap.String("from", from))
+	if from != "" {
+		if strings.HasPrefix(from, "/") {
+			session.Set(redirectKey, from)
+		} else if from != "" {
+			logger.Warn("invalid from parameter", zap.String("from", from))
+		}
 	}
 
 	stateValue := randomAlphanumeric(12)
@@ -183,6 +185,7 @@ func Auth() gin.HandlerFunc {
 		ctx.Set("user", *userInfo)
 
 		session.Set(sessionID, *userInfo)
+		session.Delete(stateKey)
 		if err := session.Save(); err != nil {
 			logger.Error("failed to save session", zap.Error(err))
 			ctx.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"error": "failed to save session"})
