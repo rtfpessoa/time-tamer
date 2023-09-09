@@ -45,7 +45,7 @@ RUN apt-get -y update && \
   export DD_SITE="datadoghq.eu" && \
   bash -c "$(curl -fsSL https://s3.amazonaws.com/dd-agent/scripts/install_script_agent7.sh)"
 
-COPY --chmod=0777 ./conf.d/postgres.d /etc/datadog-agent/conf.d/postgres.d
+COPY --chmod=0777 ./conf.d/go.d /etc/datadog-agent/conf.d/go.d
 
 COPY --chmod=0777 entrypoint.sh /app/entrypoint.sh
 
