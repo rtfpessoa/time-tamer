@@ -1,6 +1,13 @@
 import { useCallback, useEffect, useState } from "react";
-import { Poll, PollGetResponse, PollWithAvailabilities } from "./models";
-import { LoaderFunction, useLoaderData } from "react-router-dom";
+import {
+  NewVoteResponse,
+  Poll,
+  PollAccountAvailability,
+  PollGetResponse,
+  PollWithAvailabilities,
+  ResponseError,
+} from "./models";
+import { LoaderFunction, useLoaderData, useNavigate } from "react-router-dom";
 import {
   Container,
   Stack,
@@ -13,7 +20,7 @@ import {
   Space,
 } from "@mantine/core";
 import dayjs from "dayjs";
-import { LocationIcon, DescriptionIcon } from "./PollGet";
+import { LocationIcon, DescriptionIcon, getPoll } from "./PollGet";
 
 export function AvailableIcon(props: React.ComponentPropsWithoutRef<"svg">) {
   const { color = "#00802b", width, height, style, ...others } = props;
@@ -97,6 +104,8 @@ function NewVote() {
   const [answers, setAnswers] = useState<Map<string, string>>(
     new Map<string, string>()
   );
+  const navigate = useNavigate();
+  const [error, setError] = useState("");
 
   useEffect(() => {
     getPoll(pollId).then((poll) => setPoll(poll));
@@ -275,21 +284,43 @@ function NewVote() {
             </Stack>
           </Stack>
         ))}
-        <Box>
+        <Group>
           <Button
             style={{ display: "flex", flexGrow: 0 }}
             size="md"
-            onClick={() => createVote(poll.poll, answers)}
+            onClick={async () => {
+              setError("");
+              try {
+                const response = await createVote(poll.poll, answers);
+
+                if ("error" in response) {
+                  setError(response.error);
+                  return;
+                }
+
+                if ("poll_id" in response) {
+                  navigate(`/poll/${poll.poll.id}`);
+                  return;
+                }
+              } catch (e) {
+                setError("Something went wrong. Please try again.");
+                return;
+              }
+            }}
           >
             Submit
           </Button>
-        </Box>
+          {error ? <Text color="red">{error}</Text> : null}
+        </Group>
       </Stack>
     </Container>
   );
 }
 
-async function createVote(poll: Poll, answers: Map<string, string>) {
+async function createVote(
+  poll: Poll,
+  answers: Map<string, string>
+): Promise<PollAccountAvailability | ResponseError> {
   const payload = Array.from(answers).map(([optionId, answer]) => {
     return { option_id: optionId, answer: answer };
   });
@@ -302,39 +333,15 @@ async function createVote(poll: Poll, answers: Map<string, string>) {
     body: JSON.stringify(payload),
   });
 
-  if (!response.ok) {
-    alert("Error creating vote");
-    return;
-  }
-
-  alert("Vote created successfully");
-}
-
-async function getPoll(id: string): Promise<PollWithAvailabilities | null> {
-  var response = await fetch(`/api/v1/poll/${id}`, {
-    method: "GET",
-    headers: {
-      "Content-Type": "application/json",
-    },
-  });
+  const obj = await response.json();
 
   if (!response.ok) {
-    return null;
+    return obj as ResponseError;
   }
 
-  const poll: PollGetResponse = await response.json();
+  const newVoteResponse = obj as NewVoteResponse;
 
-  const options = poll.data.poll.options.map((option) => {
-    return {
-      id: option.id,
-      start: new Date(option.start),
-      end: new Date(option.end),
-    };
-  });
-
-  poll.data.poll.options = options;
-
-  return poll.data;
+  return newVoteResponse.data;
 }
 
 export default NewVote;

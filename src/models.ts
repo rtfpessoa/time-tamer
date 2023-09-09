@@ -20,6 +20,10 @@ export type NewPollResponse = {
   data: Poll;
 };
 
+export type NewVoteResponse = {
+  data: PollAccountAvailability;
+};
+
 export type PollGetResponse = {
   data: PollWithAvailabilities;
 };

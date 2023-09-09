@@ -348,7 +348,7 @@ function PollGet() {
   );
 }
 
-async function getPoll(id: string): Promise<PollWithAvailabilities | null> {
+export async function getPoll(id: string): Promise<PollWithAvailabilities | null> {
   var response = await fetch(`/api/v1/poll/${id}`, {
     method: "GET",
     headers: {
@@ -375,7 +375,7 @@ async function getPoll(id: string): Promise<PollWithAvailabilities | null> {
   return poll.data;
 }
 
-async function deletePoll(id: string): Promise<Poll | ResponseError> {
+export async function deletePoll(id: string): Promise<Poll | ResponseError> {
   var response = await fetch(`/api/v1/poll/${id}`, {
     method: "DELETE",
     headers: {
