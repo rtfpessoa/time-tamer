@@ -82,33 +82,6 @@ function PollGet() {
 
   useEffect(() => {
     getPoll(pollId).then((poll) => setPoll(poll));
-    // setPoll({
-    //   poll: {
-    //     id: "1",
-    //     title: "Test",
-    //     description: "Test",
-    //     location: "Test",
-    //     options: [
-    //       {
-    //         id: "1",
-    //         start: new Date(),
-    //         end: new Date(),
-    //       },
-    //     ],
-    //   },
-    //   availabilities: [
-    //     {
-    //       poll_id: "asasasa",
-    //       account_id: 1,
-    //       availabilities: [
-    //         {
-    //           option_id: "1",
-    //           answer: "available",
-    //         },
-    //       ],
-    //     },
-    //   ],
-    // });
   }, [pollId]);
 
   if (poll == null) {
