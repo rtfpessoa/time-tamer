@@ -219,10 +219,10 @@ function PollGet() {
                       new Map<string, string[]>()
                     )
                   )
-                    .sort(([key1, _v1], [key2, _v2]) =>
-                      key1.localeCompare(key2)
+                    .sort(([answer1], [answer2]) =>
+                      answer1.localeCompare(answer2)
                     )
-                    .map(([key, values]) => (
+                    .map(([answer, values]) => (
                       <Box
                         style={{
                           display: "flex",
@@ -231,7 +231,7 @@ function PollGet() {
                         }}
                       >
                         <Text>
-                          {capitalize(key)}: {values.length}
+                          {capitalize(answer)}: {values.length}
                         </Text>
                         <Group
                           spacing="0px"
