@@ -257,6 +257,8 @@ function PollGet() {
                             {values.slice(0, 4).map((email, idx) => (
                               <Avatar
                                 email={email}
+                                name={email}
+                                alt={email}
                                 round
                                 size="40px"
                                 style={{
