@@ -25,6 +25,8 @@ services:
         value: datadoghq.eu
       - key: DD_AUTOCONFIG_FROM_ENVIRONMENT
         value: false
+      - key: DD_LOGS_ENABLED
+        value: true
       - key: NON_LOCAL_TRAFFIC
         value: true
       - key: DD_APM_NON_LOCAL_TRAFFIC

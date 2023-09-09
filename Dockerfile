@@ -29,11 +29,6 @@ RUN go mod tidy && \
 
 FROM debian:stable
 
-ENV DD_SITE "datadoghq.eu"
-ENV DD_APPSEC_ENABLED true
-ENV DD_HOSTNAME roodle
-ENV DD_HOSTNAME_TRUST_UTS_NAMESPACE true
-
 WORKDIR /app
 
 COPY --from=build /app/resources /app/resources
@@ -41,8 +36,12 @@ COPY --from=build --chmod=0777 /app/bin/app /app/bin/app
 
 RUN apt-get -y update && \
   apt-get -y install curl && \
-  export DD_API_KEY=fake-api-key && \
-  export DD_SITE="datadoghq.eu" && \
+  DD_APPSEC_ENABLED=true \
+  DD_HOSTNAME=roodle \
+  DD_HOSTNAME_TRUST_UTS_NAMESPACE=true \
+  DD_SITE="datadoghq.eu" \
+  DD_API_KEY=fake-api-key \
+  DD_INSTALL_ONLY=true \
   bash -c "$(curl -fsSL https://s3.amazonaws.com/dd-agent/scripts/install_script_agent7.sh)"
 
 COPY --chmod=0777 ./conf.d/go.d /etc/datadog-agent/conf.d/go.d
