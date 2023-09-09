@@ -242,7 +242,7 @@ func DeletePoll(ctx context.Context, db *sql.DB, accountID int64, pollID string)
 	sqlStatement := `
 	DELETE FROM polls
 	WHERE account_id = $1 AND id = $2
-	RETURNING (title, description, location, options);`
+	RETURNING (title, description, location, jsonb_pretty(options));`
 
 	var title string
 	var description string
