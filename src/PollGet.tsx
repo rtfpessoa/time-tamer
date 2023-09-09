@@ -218,64 +218,68 @@ function PollGet() {
                       },
                       new Map<string, string[]>()
                     )
-                  ).map(([key, values]) => (
-                    <Box
-                      style={{
-                        display: "flex",
-                        flexDirection: "column",
-                        overflow: "hidden",
-                      }}
-                    >
-                      <Text>
-                        {capitalize(key)}: {values.length}
-                      </Text>
-                      <Group
-                        spacing="0px"
+                  )
+                    .sort(([key1, _v1], [key2, _v2]) =>
+                      key1.localeCompare(key2)
+                    )
+                    .map(([key, values]) => (
+                      <Box
                         style={{
                           display: "flex",
-                          flexDirection: "row",
-                          flexWrap: "nowrap",
+                          flexDirection: "column",
                           overflow: "hidden",
                         }}
                       >
-                        {values.slice(0, 4).map((email, idx) => (
-                          <Avatar
-                            email={email}
-                            round
-                            size="40px"
-                            style={{
-                              flexShrink: 0,
-                              border: "2px solid #fff",
-                              boxSizing: "content-box",
-                              marginLeft: `-${idx === 0 ? 0 : 20}px`,
-                            }}
-                          />
-                        ))}
-                        {values.length > 4 ? (
-                          <Box
-                            style={{
-                              display: "flex",
-                              flexShrink: 0,
-                              alignContent: "center",
-                              alignItems: "center",
-                              justifyContent: "center",
-                              width: "40px",
-                              height: "40px",
-                              borderRadius: "100%",
-                              marginLeft: "-20px",
-                              backgroundColor: "#94bdb7",
-                              border: "2px solid #fff",
-                              boxSizing: "content-box",
-                            }}
-                          >
-                            <Text size="xs" color="#1d2f2c">
-                              +{values.length - 4}
-                            </Text>
-                          </Box>
-                        ) : null}
-                      </Group>
-                    </Box>
-                  ))}
+                        <Text>
+                          {capitalize(key)}: {values.length}
+                        </Text>
+                        <Group
+                          spacing="0px"
+                          style={{
+                            display: "flex",
+                            flexDirection: "row",
+                            flexWrap: "nowrap",
+                            overflow: "hidden",
+                          }}
+                        >
+                          {values.slice(0, 4).map((email, idx) => (
+                            <Avatar
+                              email={email}
+                              round
+                              size="40px"
+                              style={{
+                                flexShrink: 0,
+                                border: "2px solid #fff",
+                                boxSizing: "content-box",
+                                marginLeft: `-${idx === 0 ? 0 : 20}px`,
+                              }}
+                            />
+                          ))}
+                          {values.length > 4 ? (
+                            <Box
+                              style={{
+                                display: "flex",
+                                flexShrink: 0,
+                                alignContent: "center",
+                                alignItems: "center",
+                                justifyContent: "center",
+                                width: "40px",
+                                height: "40px",
+                                borderRadius: "100%",
+                                marginLeft: "-20px",
+                                backgroundColor: "#94bdb7",
+                                border: "2px solid #fff",
+                                boxSizing: "content-box",
+                              }}
+                            >
+                              <Text size="xs" color="#1d2f2c">
+                                +{values.length - 4}
+                              </Text>
+                            </Box>
+                          ) : null}
+                        </Group>
+                      </Box>
+                    ))}
                 </Group>
               </Card>
             </Stack>
