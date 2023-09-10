@@ -90,6 +90,7 @@ func StartServer() error {
 	router.StaticFile("/robots.txt", "resources/robots.txt")
 	router.NoRoute(index)
 	router.GET("/", index)
+	router.GET("/health", health(db))
 	router.GET("/login", LoginHandler)
 	router.GET("/logout", LogoutHandler)
 
@@ -154,6 +155,18 @@ func StartServer() error {
 func index(c *gin.Context) {
 	c.Status(http.StatusOK)
 	c.HTML(http.StatusOK, "index.html", nil)
+}
+
+func health(db *sql.DB) gin.HandlerFunc {
+	return func(ctx *gin.Context) {
+		err := db.PingContext(ctx)
+		if err != nil {
+			ctx.JSON(http.StatusInternalServerError, gin.H{"server": "healthy", "db": "unhealthy"})
+			return
+		}
+
+		ctx.JSON(http.StatusOK, gin.H{"server": "healthy", "db": "healthy"})
+	}
 }
 
 const ACCOUNT_ID_KEY = "ACCOUNT_ID"
