@@ -9,10 +9,6 @@ is_service_running() {
 start_service() {
   echo "Starting $service_name..."
 
-  # Clean previous setup logs
-  rm -f /var/log/datadog/agent.log
-  touch /var/log/datadog/agent.log
-
   # Fix API key
   sed -i "/fake-api-key/capi_key: $DD_API_KEY" /etc/datadog-agent/datadog.yaml
   service "${service_name}" start
@@ -28,12 +24,16 @@ while true; do
     echo "$service_name is running"
     # Dump service logs for debug purposes
     cat /var/log/datadog/agent.log
+    cat /var/log/datadog/process-agent.log
+    cat /var/log/datadog/trace-agent.log
     break
   else
     echo "$service_name is not running"
     start_service
     # Dump service logs for debug purposes
     cat /var/log/datadog/agent.log
+    cat /var/log/datadog/process-agent.log
+    cat /var/log/datadog/trace-agent.log
   fi
 done
 
