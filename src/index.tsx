@@ -47,11 +47,7 @@ const root = ReactDOM.createRoot(
 const router = createBrowserRouter([
   {
     path: "/",
-    element: (
-      <PageContent requiresAuth={false}>
-        <App />
-      </PageContent>
-    ),
+    element: <App />,
     errorElement: <ErrorPage />,
   },
   {

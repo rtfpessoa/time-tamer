@@ -8,7 +8,6 @@ import {
   Text,
   NativeSelect,
   Stack,
-  Container,
   Space,
   Title,
   Button,
@@ -151,7 +150,7 @@ function NewPoll() {
   const [error, setError] = useState("");
 
   return (
-    <Container size="xs" px="xs" mt="md">
+    <Stack>
       <Stack>
         <Title order={1} size="h1" weight={900} align="center">
           New Poll
@@ -259,7 +258,7 @@ function NewPoll() {
         </Button>
         {error ? <Text color="red">{error}</Text> : null}
       </Group>
-    </Container>
+    </Stack>
   );
 }
 

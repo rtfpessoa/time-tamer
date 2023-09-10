@@ -8,7 +8,6 @@ import {
 } from "./models";
 import { LoaderFunction, useLoaderData, useNavigate } from "react-router-dom";
 import {
-  Container,
   Stack,
   Group,
   Title,
@@ -121,107 +120,101 @@ function NewVote() {
   }
 
   return (
-    <Container size="xs" px="xs" mt="md">
-      <Stack>
-        <Group
-          style={{ flexDirection: "row", justifyContent: "space-between" }}
-        >
-          <Title>{poll.poll.title || poll.poll.id}</Title>
-        </Group>
-        <Stack spacing={"4px"} mb="lg">
-          {poll.poll.location !== undefined ? (
-            <Group spacing={"4px"}>
-              <LocationIcon width={"1rem"} />
-              <Text size="lg">{poll.poll.location}</Text>
-            </Group>
-          ) : null}
-          {poll.poll.description !== undefined ? (
-            <Group spacing={"4px"}>
-              <DescriptionIcon width={"1rem"} />
-              <Text size="lg">{poll.poll.description}</Text>
-            </Group>
-          ) : null}
-        </Stack>
-        {poll.poll.options.map((option) => (
+    <Stack>
+      <Group style={{ flexDirection: "row", justifyContent: "space-between" }}>
+        <Title>{poll.poll.title || poll.poll.id}</Title>
+      </Group>
+      <Stack spacing={"4px"} mb="lg">
+        {poll.poll.location !== undefined ? (
+          <Group spacing={"4px"}>
+            <LocationIcon width={"1rem"} />
+            <Text size="lg">{poll.poll.location}</Text>
+          </Group>
+        ) : null}
+        {poll.poll.description !== undefined ? (
+          <Group spacing={"4px"}>
+            <DescriptionIcon width={"1rem"} />
+            <Text size="lg">{poll.poll.description}</Text>
+          </Group>
+        ) : null}
+      </Stack>
+      {poll.poll.options.map((option) => (
+        <Stack>
           <Stack>
-            <Stack>
-              <Card withBorder radius="md" p={"sm"}>
-                <Group spacing={"xs"}>
-                  <Text size="xl">
-                    {dayjs(option.start).format("ddd D MMM")}
-                  </Text>
-                  <Text>
-                    {dayjs(option.start).format("h:mm A")}
-                    {" - "}
-                    {dayjs(option.end).format("h:mm A")}
-                  </Text>
-                </Group>
-                <Space h="md" />
-                <Group
-                  style={{
-                    display: "grid",
-                    gridTemplateColumns: "repeat(3, 1fr)",
-                  }}
+            <Card withBorder radius="md" p={"sm"}>
+              <Group spacing={"xs"}>
+                <Text size="xl">{dayjs(option.start).format("ddd D MMM")}</Text>
+                <Text>
+                  {dayjs(option.start).format("h:mm A")}
+                  {" - "}
+                  {dayjs(option.end).format("h:mm A")}
+                </Text>
+              </Group>
+              <Space h="md" />
+              <Group
+                style={{
+                  display: "grid",
+                  gridTemplateColumns: "repeat(3, 1fr)",
+                }}
+              >
+                <Button
+                  variant="subtle"
+                  disabled={answers.get(option.id) === "available"}
+                  onClick={() => setAnswer(option.id, "available")}
                 >
-                  <Button
-                    variant="subtle"
-                    disabled={answers.get(option.id) === "available"}
-                    onClick={() => setAnswer(option.id, "available")}
-                  >
-                    <AvailableIcon width={"20px"}></AvailableIcon>
-                    <Text>Available</Text>
-                  </Button>
-                  <Button
-                    variant="subtle"
-                    disabled={answers.get(option.id) === "maybe"}
-                    onClick={() => setAnswer(option.id, "maybe")}
-                  >
-                    <MaybeIcon width={"20px"}></MaybeIcon>
-                    <Text>Maybe</Text>
-                  </Button>
-                  <Button
-                    variant="subtle"
-                    disabled={answers.get(option.id) === "unavailable"}
-                    onClick={() => setAnswer(option.id, "unavailable")}
-                  >
-                    <UnavailableIcon width={"20px"}></UnavailableIcon>
-                    <Text>Unavailable</Text>
-                  </Button>
-                </Group>
-              </Card>
-            </Stack>
+                  <AvailableIcon width={"20px"}></AvailableIcon>
+                  <Text>Available</Text>
+                </Button>
+                <Button
+                  variant="subtle"
+                  disabled={answers.get(option.id) === "maybe"}
+                  onClick={() => setAnswer(option.id, "maybe")}
+                >
+                  <MaybeIcon width={"20px"}></MaybeIcon>
+                  <Text>Maybe</Text>
+                </Button>
+                <Button
+                  variant="subtle"
+                  disabled={answers.get(option.id) === "unavailable"}
+                  onClick={() => setAnswer(option.id, "unavailable")}
+                >
+                  <UnavailableIcon width={"20px"}></UnavailableIcon>
+                  <Text>Unavailable</Text>
+                </Button>
+              </Group>
+            </Card>
           </Stack>
-        ))}
-        <Group>
-          <Button
-            style={{ display: "flex", flexGrow: 0 }}
-            size="md"
-            onClick={async () => {
-              setError("");
-              try {
-                const response = await createVote(poll.poll, answers);
+        </Stack>
+      ))}
+      <Group>
+        <Button
+          style={{ display: "flex", flexGrow: 0 }}
+          size="md"
+          onClick={async () => {
+            setError("");
+            try {
+              const response = await createVote(poll.poll, answers);
 
-                if ("error" in response) {
-                  setError(response.error);
-                  return;
-                }
-
-                if ("poll_id" in response) {
-                  navigate(`/poll/${poll.poll.id}`);
-                  return;
-                }
-              } catch (e) {
-                setError("Something went wrong. Please try again.");
+              if ("error" in response) {
+                setError(response.error);
                 return;
               }
-            }}
-          >
-            Submit
-          </Button>
-          {error ? <Text color="red">{error}</Text> : null}
-        </Group>
-      </Stack>
-    </Container>
+
+              if ("poll_id" in response) {
+                navigate(`/poll/${poll.poll.id}`);
+                return;
+              }
+            } catch (e) {
+              setError("Something went wrong. Please try again.");
+              return;
+            }
+          }}
+        >
+          Submit
+        </Button>
+        {error ? <Text color="red">{error}</Text> : null}
+      </Group>
+    </Stack>
   );
 }
 

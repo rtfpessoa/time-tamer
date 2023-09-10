@@ -1,4 +1,4 @@
-import { Box } from "@mantine/core";
+import { Box, Container } from "@mantine/core";
 import { Header } from "./header";
 import { RequireAuth } from "./use-auth";
 import { Footer } from "./footer";
@@ -15,8 +15,10 @@ export function PageContent({
   return (
     <Box>
       <Header />
-      <Box style={{ minHeight: "calc(100vh - 60px - 1rem)" }}>
-        {requiresAuth ? <RequireAuth children={children} /> : children}
+      <Box style={{ minHeight: "calc(100vh - 3.75rem - 1rem)" }}>
+        <Container size="xs" px="xs" my="md">
+          {requiresAuth ? <RequireAuth children={children} /> : children}
+        </Container>
       </Box>
       <Footer />
     </Box>

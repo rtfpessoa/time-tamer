@@ -6,7 +6,6 @@ import {
   Stack,
   Title,
   Text,
-  Container,
   Button,
   Card,
   Box,
@@ -69,81 +68,77 @@ function PollList() {
   }, []);
 
   return (
-    <Container size="xs" px="xs" mt="md">
+    <Stack>
+      <Group style={{ flexDirection: "row", justifyContent: "space-between" }}>
+        <Title>Polls</Title>
+
+        <Button onClick={() => navigate("/poll/new")}>
+          <Group spacing={"5px"}>
+            <AddIcon width={"12px"} />
+            <Text>New</Text>
+          </Group>
+        </Button>
+      </Group>
+
       <Stack>
-        <Group
-          style={{ flexDirection: "row", justifyContent: "space-between" }}
-        >
-          <Title>Polls</Title>
-
-          <Button onClick={() => navigate("/poll/new")}>
-            <Group spacing={"5px"}>
-              <AddIcon width={"12px"} />
-              <Text>New</Text>
-            </Group>
-          </Button>
-        </Group>
-
-        <Stack>
-          {polls.map((poll) => (
-            <Card withBorder radius="md" p={"sm"}>
-              <Group noWrap spacing={0}>
-                <Box>
-                  <Text
-                    transform="uppercase"
-                    color="dimmed"
-                    weight={700}
+        {polls.map((poll) => (
+          <Card withBorder radius="md" p={"sm"}>
+            <Group noWrap spacing={0}>
+              <Box>
+                <Text
+                  transform="uppercase"
+                  color="dimmed"
+                  weight={700}
+                  size="xs"
+                >
+                  {poll.title || poll.id}
+                </Text>
+                <Text mt="xs" mb="md">
+                  {poll.options.length} options
+                </Text>
+                <Group noWrap spacing="0px">
+                  <Button
+                    variant="subtle"
+                    color={"#228be6"}
+                    onClick={() => navigate(`/poll/${poll.id}`)}
+                    p={"4px"}
                     size="xs"
                   >
-                    {poll.title || poll.id}
+                    <Text size="sm">View</Text>
+                  </Button>
+                  <Text size="xs" color="dimmed">
+                    •
                   </Text>
-                  <Text mt="xs" mb="md">
-                    {poll.options.length} options
-                  </Text>
-                  <Group noWrap spacing="0px">
-                    <Button
-                      variant="subtle"
-                      color={"#228be6"}
-                      onClick={() => navigate(`/poll/${poll.id}`)}
-                      p={"4px"}
-                      size="xs"
-                    >
-                      <Text size="sm">View</Text>
-                    </Button>
-                    <Text size="xs" color="dimmed">
-                      •
-                    </Text>
-                    <CopyButton
-                      value={`https://roodle.onrender.com/poll/${poll.id}/vote`}
-                    >
-                      {({ copied, copy }) => (
-                        <Button
-                          variant="subtle"
-                          color={copied ? "teal" : "#228be6"}
-                          onClick={copy}
-                          p={"4px"}
-                          size="xs"
-                        >
-                          <Group spacing={"4px"}>
-                            <ClipboardIcon
-                              width={"12px"}
-                              color={copied ? "teal" : "#228be6"}
-                            />
-                            <Text size="sm">
-                              {copied ? "Copied link" : "Copy link"}
-                            </Text>
-                          </Group>
-                        </Button>
-                      )}
-                    </CopyButton>
-                  </Group>
-                </Box>
-              </Group>
-            </Card>
-          ))}
-        </Stack>
+                  <CopyButton
+                    value={`https://roodle.onrender.com/poll/${poll.id}/vote`}
+                  >
+                    {({ copied, copy }) => (
+                      <Button
+                        variant="subtle"
+                        color={copied ? "teal" : "#228be6"}
+                        onClick={copy}
+                        p={"4px"}
+                        size="xs"
+                      >
+                        <Group spacing={"4px"}>
+                          <ClipboardIcon
+                            width={"12px"}
+                            color={copied ? "teal" : "#228be6"}
+                          />
+                          <Text size="sm">
+                            {copied ? "Copied link" : "Copy link"}
+                          </Text>
+                        </Group>
+                      </Button>
+                    )}
+                  </CopyButton>
+                </Group>
+              </Box>
+            </Group>
+          </Card>
+        ))}
       </Stack>
-    </Container>
+    </Stack>
   );
 }
 

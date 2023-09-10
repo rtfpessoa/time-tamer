@@ -9,7 +9,6 @@ import {
 import { LoaderFunction, useLoaderData, useNavigate } from "react-router-dom";
 import {
   Button,
-  Container,
   Group,
   Stack,
   Title,
@@ -102,236 +101,230 @@ function PollGet() {
   });
 
   return (
-    <Container size="xs" px="xs" mt="md">
-      <Stack>
-        <Group
-          style={{ flexDirection: "row", justifyContent: "space-between" }}
-        >
-          <Title>{poll.poll.title || poll.poll.id}</Title>
+    <Stack>
+      <Group style={{ flexDirection: "row", justifyContent: "space-between" }}>
+        <Title>{poll.poll.title || poll.poll.id}</Title>
 
-          <Group spacing={"4px"}>
-            <Button
-              variant="subtle"
-              color={"#228be6"}
-              onClick={() => navigate(`/poll/${poll.poll.id}/vote`)}
-              p={"4px"}
-              size="xs"
-            >
-              <Text size="md">Vote</Text>
-            </Button>
-            <Text size="xs" color="dimmed">
-              •
-            </Text>
-            <CopyButton
-              value={`https://roodle.onrender.com/poll/${poll.poll.id}/vote`}
-            >
-              {({ copied, copy }) => (
-                <Button
-                  variant="subtle"
-                  color={copied ? "teal" : "#228be6"}
-                  onClick={copy}
-                  p={"4px"}
-                  size="xs"
-                >
-                  <Group spacing={"4px"}>
-                    <ClipboardIcon
-                      width={"12px"}
-                      color={copied ? "teal" : "#228be6"}
-                    />
-                    <Text size="md">
-                      {copied ? "Copied link" : "Copy link"}
-                    </Text>
-                  </Group>
-                </Button>
-              )}
-            </CopyButton>
-          </Group>
+        <Group spacing={"4px"}>
+          <Button
+            variant="subtle"
+            color={"#228be6"}
+            onClick={() => navigate(`/poll/${poll.poll.id}/vote`)}
+            p={"4px"}
+            size="xs"
+          >
+            <Text size="md">Vote</Text>
+          </Button>
+          <Text size="xs" color="dimmed">
+            •
+          </Text>
+          <CopyButton
+            value={`https://roodle.onrender.com/poll/${poll.poll.id}/vote`}
+          >
+            {({ copied, copy }) => (
+              <Button
+                variant="subtle"
+                color={copied ? "teal" : "#228be6"}
+                onClick={copy}
+                p={"4px"}
+                size="xs"
+              >
+                <Group spacing={"4px"}>
+                  <ClipboardIcon
+                    width={"12px"}
+                    color={copied ? "teal" : "#228be6"}
+                  />
+                  <Text size="md">{copied ? "Copied link" : "Copy link"}</Text>
+                </Group>
+              </Button>
+            )}
+          </CopyButton>
         </Group>
-        <Stack spacing={"4px"} mb="lg">
-          {poll.poll.description ? (
-            <Group spacing={"4px"}>
-              <DescriptionIcon width={"1rem"} />
-              <Text size="lg">{poll.poll.description}</Text>
-            </Group>
-          ) : null}
-          {poll.poll.location ? (
-            <Group spacing={"4px"}>
-              <LocationIcon width={"1rem"} />
-              <Text size="lg">{poll.poll.location}</Text>
-            </Group>
-          ) : null}
-        </Stack>
-        {poll.poll.options
-          .sort((option1, option2) => {
-            const option1Score = scoreAnswers(answers.get(option1.id) ?? []);
-            const option2Score = scoreAnswers(answers.get(option2.id) ?? []);
+      </Group>
+      <Stack spacing={"4px"} mb="lg">
+        {poll.poll.description ? (
+          <Group spacing={"4px"}>
+            <DescriptionIcon width={"1rem"} />
+            <Text size="lg">{poll.poll.description}</Text>
+          </Group>
+        ) : null}
+        {poll.poll.location ? (
+          <Group spacing={"4px"}>
+            <LocationIcon width={"1rem"} />
+            <Text size="lg">{poll.poll.location}</Text>
+          </Group>
+        ) : null}
+      </Stack>
+      {poll.poll.options
+        .sort((option1, option2) => {
+          const option1Score = scoreAnswers(answers.get(option1.id) ?? []);
+          const option2Score = scoreAnswers(answers.get(option2.id) ?? []);
 
-            if (option1Score !== option2Score) {
-              return option1Score - option2Score;
-            }
+          if (option1Score !== option2Score) {
+            return option1Score - option2Score;
+          }
 
-            return option2.start.getTime() - option1.start.getTime();
-          })
-          .reverse()
-          .map((option) => (
+          return option2.start.getTime() - option1.start.getTime();
+        })
+        .reverse()
+        .map((option) => (
+          <Stack>
             <Stack>
-              <Stack>
-                <Card withBorder radius="md" p={"sm"}>
-                  <Group spacing={"xs"}>
-                    <Text size="xl">
-                      {dayjs(option.start).format("ddd D MMM")}
-                    </Text>
-                    <Text>
-                      {dayjs(option.start).format("h:mm A")}
-                      {" - "}
-                      {dayjs(option.end).format("h:mm A")}
-                    </Text>
-                  </Group>
-                  <Group
-                    style={{
-                      display: "grid",
-                      gridTemplateColumns: "repeat(3, 1fr)",
-                    }}
-                  >
-                    {Array.from(
-                      (answers.get(option.id) ?? []).reduce(
-                        (group, { answer, email }) => {
-                          return group.set(
-                            answer,
-                            (group.get(answer) ?? []).concat(email)
-                          );
-                        },
-                        new Map<string, string[]>()
-                      )
+              <Card withBorder radius="md" p={"sm"}>
+                <Group spacing={"xs"}>
+                  <Text size="xl">
+                    {dayjs(option.start).format("ddd D MMM")}
+                  </Text>
+                  <Text>
+                    {dayjs(option.start).format("h:mm A")}
+                    {" - "}
+                    {dayjs(option.end).format("h:mm A")}
+                  </Text>
+                </Group>
+                <Group
+                  style={{
+                    display: "grid",
+                    gridTemplateColumns: "repeat(3, 1fr)",
+                  }}
+                >
+                  {Array.from(
+                    (answers.get(option.id) ?? []).reduce(
+                      (group, { answer, email }) => {
+                        return group.set(
+                          answer,
+                          (group.get(answer) ?? []).concat(email)
+                        );
+                      },
+                      new Map<string, string[]>()
                     )
-                      .sort(([answer1], [answer2]) =>
-                        answer1.localeCompare(answer2)
-                      )
-                      .map(([answer, values]) => (
-                        <Box
+                  )
+                    .sort(([answer1], [answer2]) =>
+                      answer1.localeCompare(answer2)
+                    )
+                    .map(([answer, values]) => (
+                      <Box
+                        style={{
+                          display: "flex",
+                          flexDirection: "column",
+                          overflow: "hidden",
+                        }}
+                      >
+                        <Text>
+                          {capitalize(answer)}: {values.length}
+                        </Text>
+                        <Group
+                          spacing="0px"
                           style={{
                             display: "flex",
-                            flexDirection: "column",
+                            flexDirection: "row",
+                            flexWrap: "nowrap",
                             overflow: "hidden",
                           }}
                         >
-                          <Text>
-                            {capitalize(answer)}: {values.length}
-                          </Text>
-                          <Group
-                            spacing="0px"
-                            style={{
-                              display: "flex",
-                              flexDirection: "row",
-                              flexWrap: "nowrap",
-                              overflow: "hidden",
-                            }}
-                          >
-                            {values.slice(0, 4).map((email, idx) => (
-                              <Avatar
-                                email={email}
-                                name={email}
-                                alt={email}
-                                round
-                                size="40px"
-                                style={{
-                                  flexShrink: 0,
-                                  border: "2px solid #fff",
-                                  boxSizing: "content-box",
-                                  marginLeft: `-${idx === 0 ? 0 : 20}px`,
-                                }}
-                              />
-                            ))}
-                            {values.length > 4 ? (
-                              <Box
-                                style={{
-                                  display: "flex",
-                                  flexShrink: 0,
-                                  alignContent: "center",
-                                  alignItems: "center",
-                                  justifyContent: "center",
-                                  width: "40px",
-                                  height: "40px",
-                                  borderRadius: "100%",
-                                  marginLeft: "-20px",
-                                  backgroundColor: "#94bdb7",
-                                  border: "2px solid #fff",
-                                  boxSizing: "content-box",
-                                }}
-                              >
-                                <Text size="xs" color="#1d2f2c">
-                                  +{values.length - 4}
-                                </Text>
-                              </Box>
-                            ) : null}
-                          </Group>
-                        </Box>
-                      ))}
-                  </Group>
-                </Card>
-              </Stack>
+                          {values.slice(0, 4).map((email, idx) => (
+                            <Avatar
+                              email={email}
+                              name={email}
+                              alt={email}
+                              round
+                              size="40px"
+                              style={{
+                                flexShrink: 0,
+                                border: "2px solid #fff",
+                                boxSizing: "content-box",
+                                marginLeft: `-${idx === 0 ? 0 : 20}px`,
+                              }}
+                            />
+                          ))}
+                          {values.length > 4 ? (
+                            <Box
+                              style={{
+                                display: "flex",
+                                flexShrink: 0,
+                                alignContent: "center",
+                                alignItems: "center",
+                                justifyContent: "center",
+                                width: "40px",
+                                height: "40px",
+                                borderRadius: "100%",
+                                marginLeft: "-20px",
+                                backgroundColor: "#94bdb7",
+                                border: "2px solid #fff",
+                                boxSizing: "content-box",
+                              }}
+                            >
+                              <Text size="xs" color="#1d2f2c">
+                                +{values.length - 4}
+                              </Text>
+                            </Box>
+                          ) : null}
+                        </Group>
+                      </Box>
+                    ))}
+                </Group>
+              </Card>
             </Stack>
-          ))}
-        <Box>
-          <Button
-            style={{ display: "flex", flexGrow: 0 }}
-            size="md"
-            onClick={open}
-          >
-            Delete
-          </Button>
-          <Modal
-            opened={opened}
-            onClose={close}
-            title="Deletion confirmation"
-            size="lg"
-          >
-            <Stack>
-              <Group>
-                <Text>
-                  Are you sure you want to delete{" "}
-                  <Text span weight={900}>
-                    {poll.poll.title || poll.poll.id}
-                  </Text>{" "}
-                  poll?
-                </Text>
-              </Group>
-              <Group>
-                <Button
-                  type="submit"
-                  color="red"
-                  onClick={async () => {
-                    setError("");
-                    try {
-                      const response = await deletePoll(poll.poll.id);
+          </Stack>
+        ))}
+      <Box>
+        <Button
+          style={{ display: "flex", flexGrow: 0 }}
+          size="md"
+          onClick={open}
+        >
+          Delete
+        </Button>
+        <Modal
+          opened={opened}
+          onClose={close}
+          title="Deletion confirmation"
+          size="lg"
+        >
+          <Stack>
+            <Group>
+              <Text>
+                Are you sure you want to delete{" "}
+                <Text span weight={900}>
+                  {poll.poll.title || poll.poll.id}
+                </Text>{" "}
+                poll?
+              </Text>
+            </Group>
+            <Group>
+              <Button
+                type="submit"
+                color="red"
+                onClick={async () => {
+                  setError("");
+                  try {
+                    const response = await deletePoll(poll.poll.id);
 
-                      if ("error" in response) {
-                        setError(response.error);
-                        return;
-                      }
-
-                      if ("id" in response) {
-                        navigate(`/poll`);
-                        return;
-                      }
-                    } catch (e) {
-                      setError("Something went wrong. Please try again.");
+                    if ("error" in response) {
+                      setError(response.error);
                       return;
                     }
-                  }}
-                >
-                  Yes
-                </Button>
-                <Button variant="default" onClick={close} type="reset">
-                  Cancel
-                </Button>
-                {error ? <Text color="red">{error}</Text> : null}
-              </Group>
-            </Stack>
-          </Modal>
-        </Box>
-      </Stack>
-    </Container>
+
+                    if ("id" in response) {
+                      navigate(`/poll`);
+                      return;
+                    }
+                  } catch (e) {
+                    setError("Something went wrong. Please try again.");
+                    return;
+                  }
+                }}
+              >
+                Yes
+              </Button>
+              <Button variant="default" onClick={close} type="reset">
+                Cancel
+              </Button>
+              {error ? <Text color="red">{error}</Text> : null}
+            </Group>
+          </Stack>
+        </Modal>
+      </Box>
+    </Stack>
   );
 }
 
