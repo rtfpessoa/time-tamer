@@ -155,7 +155,8 @@ func Auth() gin.HandlerFunc {
 		}
 
 		retrievedState := session.Get(stateKey)
-		if retrievedState != ctx.Query(stateKey) {
+		queryState := ctx.Query(stateKey)
+		if queryState == "" || retrievedState == nil || retrievedState != ctx.Query(stateKey) {
 			logger.Error("invalid session state")
 			ctx.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": "invalid state"})
 			return
