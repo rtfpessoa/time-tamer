@@ -12,9 +12,6 @@ import (
 	"syscall"
 	"time"
 
-	gintrace "gopkg.in/DataDog/dd-trace-go.v1/contrib/gin-gonic/gin"
-	"gopkg.in/DataDog/dd-trace-go.v1/ddtrace/tracer"
-
 	"github.com/gin-contrib/sessions"
 	"github.com/gin-gonic/gin"
 	"github.com/rtfpessoa/timer-tamer/logger"
@@ -50,18 +47,6 @@ func ConfigRuntime() {
 func StartServer() error {
 	ctx := context.Background()
 
-	tracer.Start(
-		tracer.WithSamplingRules([]tracer.SamplingRule{tracer.RateRule(1)}),
-		tracer.WithService("roodle"),
-		tracer.WithEnv("prod"),
-		tracer.WithAgentAddr("localhost:8126"),
-		// tracer.WithDebugMode(true),
-		// tracer.WithDebugStack(true),
-		tracer.WithAnalytics(true),
-		tracer.WithTraceEnabled(true),
-	)
-	defer tracer.Stop()
-
 	gin.SetMode(gin.ReleaseMode)
 
 	cookieSecretStr := os.Getenv("COOKIE_SECRET")
@@ -93,7 +78,6 @@ func StartServer() error {
 		logger.Error("recovery from panic", zap.Any("error", err))
 		c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"error": "An unexpected error occurred"})
 	}))
-	router.Use(gintrace.Middleware("roodle"))
 	router.Use(Session(sessionName))
 
 	router.LoadHTMLGlob("resources/*.html")

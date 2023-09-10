@@ -1,57 +1,19 @@
 services:
   - type: web
     name: roodle
-    runtime: docker
+    runtime: go
     branch: main
+    buildCommand: bash build.sh
+    startCommand: ./bin/app
     rootDir: .
     region: frankfurt
     plan: free
     envVars:
-      - key: DD_APM_ENABLED
-        value: true
-      - key: DD_APM_ENV
-        value: prod
-      - key: DD_PROCESS_AGENT_PROCESS_COLLECTION_ENABLED
-        value: true
-      - key: DD_PROCESS_AGENT_URL
-        value: https://process.datadoghq.eu
-      - key: DD_APPSEC_ENABLED
-        value: true
-      - key: DD_SERVICE
-        value: roodle
-      - key: DD_ENV
-        value: prod
-      - key: DD_SITE
-        value: datadoghq.eu
-      - key: DD_AUTOCONFIG_FROM_ENVIRONMENT
-        value: false
-      - key: DD_LOGS_ENABLED
-        value: true
-      - key: NON_LOCAL_TRAFFIC
-        value: true
-      - key: DD_APM_NON_LOCAL_TRAFFIC
-        value: true
-      - key: DD_LOGS_STDOUT
-        value: yes
-      - key: DD_DOGSTATSD_NON_LOCAL_TRAFFIC
-        value: true
-      - key: DD_PROCESS_AGENT_ENABLED
-        value: true
-      - key: DD_BIND_HOST
-        value: roodle
-      - key: DD_HOSTNAME
-        value: roodle
-      - key: DD_HOSTNAME_TRUST_UTS_NAMESPACE
-        value: true
       - key: PORT
         value: 8080
       - key: OAUTH2_GOOGLE_CREDENTIALS_FILE
         value: /etc/secrets/clientid.google.json
-      - key: LOGGER_FILE
-        value: /var/log/roodle/roodle.log
       - key: DATABASE_URL
         sync: false
       - key: COOKIE_SECRET
-        sync: false
-      - key: DD_API_KEY
         sync: false
