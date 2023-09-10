@@ -1,5 +1,5 @@
 import { Box, Button, Stack, Title } from "@mantine/core";
-import React from "react";
+import React, { ReactNode } from "react";
 import { useState, useEffect } from "react";
 import { useLocation } from "react-router-dom";
 
@@ -57,7 +57,7 @@ export function useAuth() {
   return React.useContext(AuthContext);
 }
 
-export function RequireAuth({ children }: { children: JSX.Element }) {
+export function RequireAuth({ children }: { children: ReactNode }) {
   let auth = useAuth();
   let location = useLocation();
 

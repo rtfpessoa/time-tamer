@@ -9,11 +9,12 @@ import PollGet, { pollGetLoader } from "./PollGet";
 import PollList from "./PollList";
 import NewVote, { newVoteLoader } from "./NewVote";
 import NewPoll from "./NewPoll";
-import { AuthProvider, RequireAuth } from "./use-auth";
-import { Box, MantineProvider } from "@mantine/core";
-import { Header } from "./header";
+import { AuthProvider } from "./use-auth";
+import { MantineProvider } from "@mantine/core";
 
 import { datadogRum } from "@datadog/browser-rum";
+import { PrivacyPolicy } from "./privacy-policy";
+import { PageContent } from "./page-content";
 
 datadogRum.init({
   applicationId: "3946deb5-0bfd-4d76-af57-3c04904340f4",
@@ -47,46 +48,45 @@ const router = createBrowserRouter([
   {
     path: "/",
     element: (
-      <Box>
-        <Header />
+      <PageContent requiresAuth={false}>
         <App />
-      </Box>
+      </PageContent>
+    ),
+    errorElement: <ErrorPage />,
+  },
+  {
+    path: "/privacy",
+    element: (
+      <PageContent requiresAuth={false}>
+        <PrivacyPolicy />
+      </PageContent>
     ),
     errorElement: <ErrorPage />,
   },
   {
     path: "/poll",
     element: (
-      <Box pb={"xl"}>
-        <Header />
-        <RequireAuth>
-          <PollList />
-        </RequireAuth>
-      </Box>
+      <PageContent requiresAuth={true}>
+        <PollList />
+      </PageContent>
     ),
     errorElement: <ErrorPage />,
   },
   {
     path: "/poll/new",
     element: (
-      <Box pb={"xl"}>
-        <Header />
-        <RequireAuth>
-          <NewPoll />
-        </RequireAuth>
-      </Box>
+      <PageContent requiresAuth={true}>
+        <NewPoll />
+      </PageContent>
     ),
     errorElement: <ErrorPage />,
   },
   {
     path: "/poll/:pollId",
     element: (
-      <Box pb={"xl"}>
-        <Header />
-        <RequireAuth>
-          <PollGet />
-        </RequireAuth>
-      </Box>
+      <PageContent requiresAuth={true}>
+        <PollGet />
+      </PageContent>
     ),
     errorElement: <ErrorPage />,
     loader: pollGetLoader,
@@ -94,12 +94,9 @@ const router = createBrowserRouter([
   {
     path: "/poll/:pollId/vote",
     element: (
-      <Box pb={"xl"}>
-        <Header />
-        <RequireAuth>
-          <NewVote />
-        </RequireAuth>
-      </Box>
+      <PageContent requiresAuth={true}>
+        <NewVote />
+      </PageContent>
     ),
     errorElement: <ErrorPage />,
     loader: newVoteLoader,
