@@ -1,32 +1,78 @@
-import { Box, Title } from "@mantine/core";
-import "./App.css";
-import { Header } from "./header";
-import { Footer } from "./footer";
+import { createBrowserRouter, RouterProvider } from "react-router-dom";
+import Home from "./Home";
+import ErrorPage from "./error-page";
+import PollGet, { pollGetLoader } from "./PollGet";
+import PollList from "./PollList";
+import NewVote, { newVoteLoader } from "./NewVote";
+import NewPoll from "./NewPoll";
+import { AuthProvider } from "./use-auth";
+import { MantineProvider } from "@mantine/core";
+
+import { PrivacyPolicy } from "./privacy-policy";
+import { PageContent } from "./page-content";
 
 function App() {
+  const router = createBrowserRouter([
+    {
+      path: "/",
+      element: <Home />,
+      errorElement: <ErrorPage />,
+    },
+    {
+      path: "/privacy",
+      element: (
+        <PageContent requiresAuth={false}>
+          <PrivacyPolicy />
+        </PageContent>
+      ),
+      errorElement: <ErrorPage />,
+    },
+    {
+      path: "/poll",
+      element: (
+        <PageContent requiresAuth={true}>
+          <PollList />
+        </PageContent>
+      ),
+      errorElement: <ErrorPage />,
+    },
+    {
+      path: "/poll/new",
+      element: (
+        <PageContent requiresAuth={true}>
+          <NewPoll />
+        </PageContent>
+      ),
+      errorElement: <ErrorPage />,
+    },
+    {
+      path: "/poll/:pollId",
+      element: (
+        <PageContent requiresAuth={true}>
+          <PollGet />
+        </PageContent>
+      ),
+      errorElement: <ErrorPage />,
+      loader: pollGetLoader,
+    },
+    {
+      path: "/poll/:pollId/vote",
+      element: (
+        <PageContent requiresAuth={true}>
+          <NewVote />
+        </PageContent>
+      ),
+      errorElement: <ErrorPage />,
+      loader: newVoteLoader,
+    },
+  ]);
+
   return (
-    <Box style={{ minWidth: "540px" }}>
-      <Header />
-      <Box className="App">
-        <header
-          className="App-header"
-          style={{ minHeight: "calc(100vh - 3.75rem)" }}
-        >
-          <img
-            src="/static/images/logo-face.png"
-            className="App-logo"
-            alt="logo"
-          />
-          <Title size="80px" color="#fff">
-            Roodle
-          </Title>
-          <Title size="40px" color="#94bdb7">
-            Your Friendly Assistant
-          </Title>
-        </header>
-      </Box>
-      <Footer />
-    </Box>
+    <MantineProvider withGlobalStyles withNormalizeCSS>
+      <AuthProvider>
+        <RouterProvider router={router} />
+      </AuthProvider>
+    </MantineProvider>
   );
 }
 

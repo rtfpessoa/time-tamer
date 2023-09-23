@@ -1,9 +1,9 @@
 import { Anchor, Box, Group, Text } from "@mantine/core";
 import dayjs from "dayjs";
-import * as utc from "dayjs/plugin/utc";
+import utc from "dayjs/plugin/utc";
 import { CalendarIcon } from "../PollGet";
 
-dayjs.extend(utc as any);
+dayjs.extend(utc);
 
 // Source: https://github.com/InteractionDesignFoundation/add-event-to-calendar-docs/blob/main/services/google.md
 type GoogleCalendarLinkProps = {
