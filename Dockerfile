@@ -28,6 +28,10 @@ RUN yarn build
 
 FROM scratch
 
+LABEL org.opencontainers.image.source=https://github.com/rtfpessoa/roodle
+LABEL org.opencontainers.image.description="Roodle is a simple application that allows you to schedule group event with other people."
+LABEL org.opencontainers.image.licenses=MIT
+
 WORKDIR /app
 
 COPY --from=build-go --chmod=0777 /app/bin/server /app/bin/server
