@@ -5,7 +5,7 @@ import { Footer } from "./footer";
 
 function App() {
   return (
-    <Box>
+    <Box style={{ minWidth: "540px" }}>
       <Header />
       <Box className="App">
         <header

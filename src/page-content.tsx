@@ -13,7 +13,7 @@ export function PageContent({
   children,
 }: PropsWithChildren<PageContentProps>) {
   return (
-    <Box>
+    <Box style={{ minWidth: "540px" }}>
       <Header />
       <Box style={{ minHeight: "calc(100vh - 3.75rem - 1rem)" }}>
         <Container size="xs" px="xs" my="md">
