@@ -1,6 +1,7 @@
 module github.com/rtfpessoa/roodle
 
-go 1.21
+// Render does not support 1.21 yet
+go 1.20
 
 require (
 	github.com/gin-gonic/gin v1.9.1
