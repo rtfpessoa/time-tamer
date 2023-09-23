@@ -5,4 +5,6 @@ set -e
 yarn
 yarn build
 
-go build -o ./bin/app
+mkdir -p ./bin
+go mod tidy
+go build -o ./bin -v ./...

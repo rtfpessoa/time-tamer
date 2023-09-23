@@ -6,10 +6,11 @@ COPY go.mod .
 COPY go.sum .
 RUN go mod download
 
-COPY server .
-RUN go build -o bin/app -ldflags="-s -w"
+COPY server server
+RUN mkdir -p ./bin && \
+  go build -v -o ./bin -ldflags="-s -w" ./...
 
-RUN chmod +x ./bin/app
+RUN chmod +x ./bin/server
 
 FROM node:20-alpine as build-js
 
@@ -29,7 +30,8 @@ FROM scratch
 
 WORKDIR /app
 
-COPY --from=build-go --chmod=0777 /app/bin/app /app/bin/app
+COPY --from=build-go --chmod=0777 /app/bin/server /app/bin/server
+COPY --from=build-go /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/
 COPY --from=build-js /app/resources /app/resources
 
-ENTRYPOINT [ "/app/bin/app" ]
+ENTRYPOINT [ "/app/bin/server" ]

@@ -21,14 +21,22 @@ import (
 )
 
 const (
-	redirectURL = "https://roodle.onrender.com/auth/google/callback"
 	sessionName = "gin_session"
 )
 
 var (
 	scopes       = []string{"https://www.googleapis.com/auth/userinfo.email"}
 	cookieSecret []byte
+	redirectURL  string
 )
+
+func init() {
+	baseURL := os.Getenv("BASE_URL")
+	if baseURL == "" {
+		baseURL = "https://roodle.onrender.com"
+	}
+	redirectURL = baseURL + "/auth/google/callback"
+}
 
 func main() {
 	ConfigRuntime()
@@ -45,6 +53,8 @@ func ConfigRuntime() {
 }
 
 func StartServer() error {
+	var err error
+
 	ctx := context.Background()
 
 	gin.SetMode(gin.ReleaseMode)
@@ -57,7 +67,20 @@ func StartServer() error {
 
 	credFile := os.Getenv("OAUTH2_GOOGLE_CREDENTIALS_FILE")
 	if credFile == "" {
-		return errors.New("missing OAUTH2_GOOGLE_CREDENTIALS_FILE environment variable")
+		credContents := os.Getenv("OAUTH2_GOOGLE_CREDENTIALS_CONTENTS")
+		if credContents == "" {
+			return errors.New("missing oauth2 google credentials. Provide OAUTH2_GOOGLE_CREDENTIALS_FILE or OAUTH2_GOOGLE_CREDENTIALS_CONTENTS environment variable")
+		} else {
+			err = SetupContents(redirectURL, []byte(credContents), scopes, cookieSecret)
+			if err != nil {
+				return err
+			}
+		}
+	} else {
+		err = SetupFile(redirectURL, credFile, scopes, cookieSecret)
+		if err != nil {
+			return err
+		}
 	}
 
 	db, err := NewDB(ctx)
@@ -67,11 +90,6 @@ func StartServer() error {
 	defer db.Close()
 
 	apiServer := NewAPIServer(db)
-
-	err = Setup(redirectURL, credFile, scopes, cookieSecret)
-	if err != nil {
-		return err
-	}
 
 	router := gin.New()
 	router.Use(gin.CustomRecovery(func(c *gin.Context, err any) {

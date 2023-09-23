@@ -1,0 +1,39 @@
+services:
+  db:
+    image: cockroachdb/cockroach:latest
+    ports:
+      - "26257:26257"
+    command: start-single-node --insecure
+    volumes:
+      - db-data:/cockroach/cockroach-data
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "./cockroach",
+          "sql",
+          "--host=db:26257",
+          "--insecure",
+          "--user",
+          "root",
+        ]
+      interval: 1s
+      timeout: 1s
+      retries: 20
+  api:
+    build:
+      context: ./
+    image: rtfpessoa/roodle
+    depends_on:
+      db:
+        condition: service_healthy
+    ports:
+      - 8080:8080
+    env_file:
+      - .server.env
+    links:
+      - db
+
+volumes:
+  db-data:
+    driver: local

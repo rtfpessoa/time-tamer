@@ -44,16 +44,11 @@ func init() {
 	gob.Register(goauth.Userinfo{})
 }
 
-func Setup(redirectURL, credFile string, scopes []string, secret []byte) error {
+func SetupContents(redirectURL string, credContents []byte, scopes []string, secret []byte) error {
 	store = cookie.NewStore(secret)
 
 	var c Credentials
-	file, err := os.ReadFile(credFile)
-	if err != nil {
-		logger.Error("failed to read oauth credentials file", zap.Error(err))
-		return err
-	}
-	if err := json.Unmarshal(file, &c); err != nil {
+	if err := json.Unmarshal(credContents, &c); err != nil {
 		logger.Error("failed to unmarshal oauth credentials file", zap.Error(err))
 		return err
 	}
@@ -65,6 +60,18 @@ func Setup(redirectURL, credFile string, scopes []string, secret []byte) error {
 		Scopes:       scopes,
 		Endpoint:     google.Endpoint,
 	}
+
+	return nil
+}
+
+func SetupFile(redirectURL string, credFile string, scopes []string, secret []byte) error {
+	file, err := os.ReadFile(credFile)
+	if err != nil {
+		logger.Error("failed to read oauth credentials file", zap.Error(err))
+		return err
+	}
+
+	SetupContents(redirectURL, file, scopes, secret)
 
 	return nil
 }
