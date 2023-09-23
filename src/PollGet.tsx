@@ -402,6 +402,10 @@ function PollGet() {
                                 border: "2px solid #fff",
                                 boxSizing: "content-box",
                               }}
+                              title={values
+                                .slice(MAX_AVATARS)
+                                .map((email) => email)
+                                .join(", ")}
                             >
                               <Text size="xs" color="#1d2f2c">
                                 +{values.length - MAX_AVATARS}
