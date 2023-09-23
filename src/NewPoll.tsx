@@ -152,7 +152,7 @@ function NewPoll() {
   return (
     <Stack>
       <Stack>
-        <Title order={1} size="h1" weight={900} align="center">
+        <Title order={1} size="h1" fw={900}>
           New Poll
         </Title>
         <TextInput
@@ -218,7 +218,7 @@ function NewPoll() {
             </Group>
           ))
         ) : (
-          <Text italic>No options</Text>
+          <Text fs="italic">No options</Text>
         )}
       </Stack>
       <Space h="lg" />

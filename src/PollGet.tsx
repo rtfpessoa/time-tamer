@@ -209,7 +209,7 @@ function PollGet() {
       <Group style={{ flexDirection: "row", justifyContent: "space-between" }}>
         <Title>{poll.poll.title || poll.poll.id}</Title>
 
-        <Group spacing={"4px"}>
+        <Group gap={"4px"}>
           <Button
             variant="subtle"
             color={"#228be6"}
@@ -233,7 +233,7 @@ function PollGet() {
                 p={"4px"}
                 size="xs"
               >
-                <Group spacing={"4px"}>
+                <Group gap={"4px"}>
                   <ClipboardIcon
                     width={"12px"}
                     color={copied ? "teal" : "#228be6"}
@@ -245,15 +245,15 @@ function PollGet() {
           </CopyButton>
         </Group>
       </Group>
-      <Stack spacing={"4px"} mb="lg">
+      <Stack gap={"4px"} mb="lg">
         {poll.poll.description ? (
-          <Group spacing={"4px"}>
+          <Group gap={"4px"}>
             <DescriptionIcon width={"1rem"} />
             <Text size="lg">{poll.poll.description}</Text>
           </Group>
         ) : null}
         {poll.poll.location ? (
-          <Group spacing={"4px"}>
+          <Group gap={"4px"}>
             <LocationIcon width={"1rem"} />
             <Text size="lg">{poll.poll.location}</Text>
           </Group>
@@ -281,7 +281,7 @@ function PollGet() {
                 style={{ overflow: "initial" }}
               >
                 <Group
-                  spacing={"xs"}
+                  gap={"xs"}
                   mb="md"
                   style={{ justifyContent: "space-between" }}
                 >
@@ -363,7 +363,7 @@ function PollGet() {
                           {capitalize(answer)}: {values.length}
                         </Text>
                         <Group
-                          spacing="0px"
+                          gap="0px"
                           style={{
                             display: "flex",
                             flexDirection: "row",
@@ -438,7 +438,7 @@ function PollGet() {
             <Group>
               <Text>
                 Are you sure you want to delete{" "}
-                <Text span weight={900}>
+                <Text span fw={900}>
                   {poll.poll.title || poll.poll.id}
                 </Text>{" "}
                 poll?

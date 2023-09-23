@@ -1,10 +1,11 @@
 import React from "react";
 import ReactDOM from "react-dom/client";
-import "./index.css";
 import App from "./App";
 import reportWebVitals from "./reportWebVitals";
-
 import { datadogRum } from "@datadog/browser-rum";
+
+import "./index.css";
+import "@mantine/core/styles.css";
 
 datadogRum.init({
   applicationId: "3946deb5-0bfd-4d76-af57-3c04904340f4",

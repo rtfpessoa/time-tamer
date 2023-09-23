@@ -6,7 +6,7 @@ import PollList from "./PollList";
 import NewVote, { newVoteLoader } from "./NewVote";
 import NewPoll from "./NewPoll";
 import { AuthProvider } from "./use-auth";
-import { MantineProvider } from "@mantine/core";
+import { ColorSchemeScript, MantineProvider } from "@mantine/core";
 
 import { PrivacyPolicy } from "./privacy-policy";
 import { PageContent } from "./page-content";
@@ -68,11 +68,14 @@ function App() {
   ]);
 
   return (
-    <MantineProvider withGlobalStyles withNormalizeCSS>
-      <AuthProvider>
-        <RouterProvider router={router} />
-      </AuthProvider>
-    </MantineProvider>
+    <>
+      <ColorSchemeScript defaultColorScheme="auto" />
+      <MantineProvider withCssVariables>
+        <AuthProvider>
+          <RouterProvider router={router} />
+        </AuthProvider>
+      </MantineProvider>
+    </>
   );
 }
 

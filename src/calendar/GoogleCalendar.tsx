@@ -58,7 +58,7 @@ export const GoogleCalendarLink = ({
       rel="noopener noreferrer"
     >
       <Box p="xs">
-        <Group spacing={"4px"}>
+        <Group gap={"4px"}>
           <CalendarIcon width={"16px"} />
           <Text size="md">Add to Google Calendar</Text>
         </Group>

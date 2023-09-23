@@ -64,7 +64,7 @@ export default class ICalLink extends React.Component<Props> {
     return (
       <Anchor onClick={this.handleClick} {...{ href, className }}>
         <Box p="xs">
-          <Group spacing={"4px"}>
+          <Group gap={"4px"}>
             <ICSIcon width={"16px"} />
             <Text size="md">Download ics</Text>
           </Group>

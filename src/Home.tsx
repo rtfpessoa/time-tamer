@@ -10,17 +10,17 @@ function Home() {
       <Box className="Home">
         <header
           className="Home-header"
-          style={{ minHeight: "calc(100vh - 3.75rem)" }}
+          style={{ minHeight: "calc(100vh - 3.5rem)" }}
         >
           <img
             src="/static/images/logo-face.png"
             className="Home-logo"
             alt="logo"
           />
-          <Title size="80px" color="#fff">
+          <Title size="80px" c="#fff">
             Roodle
           </Title>
-          <Title size="40px" color="#94bdb7">
+          <Title size="40px" c="#94bdb7">
             Your Friendly Assistant
           </Title>
         </header>

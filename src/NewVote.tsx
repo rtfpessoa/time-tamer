@@ -7,15 +7,7 @@ import {
   ResponseError,
 } from "./models";
 import { LoaderFunction, useLoaderData, useNavigate } from "react-router-dom";
-import {
-  Stack,
-  Group,
-  Title,
-  Card,
-  Text,
-  Button,
-  Space,
-} from "@mantine/core";
+import { Stack, Group, Title, Card, Text, Button, Space } from "@mantine/core";
 import dayjs from "dayjs";
 import { LocationIcon, DescriptionIcon, getPoll } from "./PollGet";
 
@@ -124,15 +116,15 @@ function NewVote() {
       <Group style={{ flexDirection: "row", justifyContent: "space-between" }}>
         <Title>{poll.poll.title || poll.poll.id}</Title>
       </Group>
-      <Stack spacing={"4px"} mb="lg">
+      <Stack gap={"4px"} mb="lg">
         {poll.poll.location !== undefined ? (
-          <Group spacing={"4px"}>
+          <Group gap={"4px"}>
             <LocationIcon width={"1rem"} />
             <Text size="lg">{poll.poll.location}</Text>
           </Group>
         ) : null}
         {poll.poll.description !== undefined ? (
-          <Group spacing={"4px"}>
+          <Group gap={"4px"}>
             <DescriptionIcon width={"1rem"} />
             <Text size="lg">{poll.poll.description}</Text>
           </Group>
@@ -142,7 +134,7 @@ function NewVote() {
         <Stack>
           <Stack>
             <Card withBorder radius="md" p={"sm"}>
-              <Group spacing={"xs"}>
+              <Group gap={"xs"}>
                 <Text size="xl">{dayjs(option.start).format("ddd D MMM")}</Text>
                 <Text>
                   {dayjs(option.start).format("h:mm A")}

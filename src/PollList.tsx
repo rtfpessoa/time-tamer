@@ -73,7 +73,7 @@ function PollList() {
         <Title>Polls</Title>
 
         <Button onClick={() => navigate("/poll/new")}>
-          <Group spacing={"5px"}>
+          <Group gap={"5px"}>
             <AddIcon width={"12px"} />
             <Text>New</Text>
           </Group>
@@ -83,20 +83,15 @@ function PollList() {
       <Stack>
         {polls.map((poll) => (
           <Card withBorder radius="md" p={"sm"}>
-            <Group noWrap spacing={0}>
+            <Group wrap="nowrap" gap={0}>
               <Box>
-                <Text
-                  transform="uppercase"
-                  color="dimmed"
-                  weight={700}
-                  size="xs"
-                >
+                <Text tt="uppercase" c="dimmed" fw={700} size="xs">
                   {poll.title || poll.id}
                 </Text>
                 <Text mt="xs" mb="md">
                   {poll.options.length} options
                 </Text>
-                <Group noWrap spacing="0px">
+                <Group wrap="nowrap" gap={0}>
                   <Button
                     variant="subtle"
                     color={"#228be6"}
@@ -120,7 +115,7 @@ function PollList() {
                         p={"4px"}
                         size="xs"
                       >
-                        <Group spacing={"4px"}>
+                        <Group gap={"4px"}>
                           <ClipboardIcon
                             width={"12px"}
                             color={copied ? "teal" : "#228be6"}

@@ -72,13 +72,13 @@ export function RequireAuth({ children }: { children: ReactNode }) {
           />
           {auth.loading ? (
             <Box>
-              <Title size="h2" color="#94bdb7">
+              <Title size="h2" c="#94bdb7">
                 Loading...
               </Title>
             </Box>
           ) : (
             <Stack>
-              <Title size="h2" color="#94bdb7">
+              <Title size="h2" c="#94bdb7">
                 This page requires authentication
               </Title>
               <Box>
