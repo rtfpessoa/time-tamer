@@ -14,7 +14,7 @@ import (
 	"github.com/gin-contrib/sessions"
 	"github.com/gin-contrib/sessions/cookie"
 	"github.com/gin-gonic/gin"
-	"github.com/rtfpessoa/timer-tamer/logger"
+	"github.com/rtfpessoa/roodle/server/logger"
 	"go.uber.org/zap"
 	goauth "google.golang.org/api/oauth2/v2"
 	"google.golang.org/api/option"
