@@ -1,6 +1,3 @@
-// Package google provides you access to Google's OAuth2
-// infrastructure. The implementation is based on this blog post:
-// http://skarlso.github.io/2016/06/12/google-signin-with-go/
 package main
 
 import (
@@ -23,7 +20,6 @@ import (
 	"golang.org/x/oauth2/google"
 )
 
-// Credentials stores google client-ids.
 type Credentials struct {
 	ClientID     string `json:"clientid"`
 	ClientSecret string `json:"secret"`
@@ -126,29 +122,6 @@ func GetLoginURL(state string) string {
 	return conf.AuthCodeURL(state)
 }
 
-// Auth is the google authorization middleware. You can use them to protect a routergroup.
-// Example:
-//
-//	       private.Use(google.Auth())
-//	       private.GET("/", UserInfoHandler)
-//	       private.GET("/api", func(ctx *gin.Context) {
-//	           ctx.JSON(200, gin.H{"message": "Hello from private for groups"})
-//	       })
-//
-//	   // Requires google oauth pkg to be imported as `goauth "google.golang.org/api/oauth2/v2"`
-//	   func UserInfoHandler(ctx *gin.Context) {
-//		      var (
-//		      	res goauth.Userinfo
-//		      	ok  bool
-//		      )
-//
-//		      val := ctx.MustGet("user")
-//		      if res, ok = val.(goauth.Userinfo); !ok {
-//		      	res = goauth.Userinfo{Name: "no user"}
-//		      }
-//
-//		      ctx.JSON(http.StatusOK, gin.H{"Hello": "from private", "user": res.Email})
-//	   }
 func Auth() gin.HandlerFunc {
 	return func(ctx *gin.Context) {
 		// Handle the exchange code to initiate a transport.
