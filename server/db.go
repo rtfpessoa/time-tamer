@@ -238,6 +238,19 @@ func ListPolls(ctx context.Context, db *sql.DB, accountID int64) ([]Poll, error)
 	return polls, nil
 }
 
+func CountPolls(ctx context.Context, db *sql.DB, accountID int64) (int64, error) {
+	sqlStatement := `SELECT count(*) FROM polls WHERE account_id = $1;`
+
+	var count int64
+	err := db.QueryRowContext(ctx, sqlStatement, accountID).Scan(&count)
+	if err != nil {
+		logger.Error("failed to retrieve polls count", zap.Error(err))
+		return -1, err
+	}
+
+	return count, nil
+}
+
 func DeletePoll(ctx context.Context, db *sql.DB, accountID int64, pollID string) (Poll, error) {
 	sqlStatement := `
 	DELETE FROM polls

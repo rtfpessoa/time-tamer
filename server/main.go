@@ -97,6 +97,7 @@ func StartServer() error {
 		c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"error": "An unexpected error occurred"})
 	}))
 	router.Use(Session(sessionName))
+	router.Use(RateLimiter())
 
 	router.LoadHTMLGlob("resources/*.html")
 	router.Static("/static", "resources/static")

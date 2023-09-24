@@ -17,6 +17,10 @@ import (
 	goauth "google.golang.org/api/oauth2/v2"
 )
 
+const (
+	MAX_POLLS_PER_ACCOUNT = 1000
+)
+
 type APIServer struct {
 	db *sql.DB
 }
@@ -66,8 +70,20 @@ func (a *APIServer) googleCallback(ctx *gin.Context) {
 func (a *APIServer) newPoll(ctx *gin.Context, accountID int64) {
 	jsonData, err := io.ReadAll(ctx.Request.Body)
 	if err != nil {
-		logger.Error("failed to read request body")
+		logger.Error("failed to read request body", zap.Any("error", err))
 		ctx.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": "invalid request payload"})
+		return
+	}
+
+	pollsNumber, err := CountPolls(ctx, a.db, accountID)
+	if err != nil {
+		logger.Error("failed to retrieve poll count", zap.Any("error", err))
+		ctx.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"error": "invalid request payload"})
+		return
+	}
+	if pollsNumber >= MAX_POLLS_PER_ACCOUNT {
+		logger.Error("Poll limit reached", zap.Int64("accountID", accountID))
+		ctx.AbortWithStatusJSON(http.StatusTeapot, gin.H{"error": fmt.Sprintf("poll limit of %d reached. delete some polls before creating a new one.", MAX_POLLS_PER_ACCOUNT)})
 		return
 	}
 
