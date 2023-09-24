@@ -5,11 +5,13 @@ import (
 	"strconv"
 	"time"
 
-	ratelimit "github.com/JGLTechnologies/gin-rate-limit"
 	"github.com/gin-gonic/gin"
+	limiter "github.com/ulule/limiter/v3"
+	mgin "github.com/ulule/limiter/v3/drivers/middleware/gin"
+	"github.com/ulule/limiter/v3/drivers/store/memory"
 )
 
-func keyFunc(ctx *gin.Context) string {
+func keyGetter(ctx *gin.Context) string {
 	value := ctx.Value(ACCOUNT_ID_KEY)
 	if value != nil {
 		if accountID, ok := value.(int64); ok {
@@ -20,20 +22,35 @@ func keyFunc(ctx *gin.Context) string {
 	return ctx.ClientIP()
 }
 
-func errorHandler(c *gin.Context, info ratelimit.Info) {
-	c.String(http.StatusTooManyRequests, "Too many requests. Try again in "+time.Until(info.ResetTime).String())
+func limitReachedHandler(c *gin.Context) {
+	c.String(http.StatusTooManyRequests, "Too many requests. Try again later.")
 }
 
 func RateLimiter() gin.HandlerFunc {
-	store := ratelimit.InMemoryStore(&ratelimit.InMemoryOptions{
-		Rate:  time.Second,
-		Limit: 10,
-	})
+	rate := limiter.Rate{
+		Period: 1 * time.Hour,
+		Limit:  10000,
+	}
 
-	mw := ratelimit.RateLimiter(store, &ratelimit.Options{
-		ErrorHandler: errorHandler,
-		KeyFunc:      keyFunc,
-	})
+	store := memory.NewStore()
 
-	return mw
+	instance := limiter.New(store, rate)
+
+	middleware := newMiddleware(instance)
+
+	return middleware
+}
+
+func newMiddleware(limiter *limiter.Limiter) gin.HandlerFunc {
+	middleware := &mgin.Middleware{
+		Limiter:        limiter,
+		OnError:        mgin.DefaultErrorHandler,
+		OnLimitReached: limitReachedHandler,
+		KeyGetter:      keyGetter,
+		ExcludedKey:    nil,
+	}
+
+	return func(ctx *gin.Context) {
+		middleware.Handle(ctx)
+	}
 }
