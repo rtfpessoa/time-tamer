@@ -1,11 +1,9 @@
 services:
   - type: web
     name: roodle
-    runtime: go
-    branch: main
-    buildCommand: bash build.sh
-    startCommand: ./bin/server
-    rootDir: .
+    runtime: image
+    image:
+      url: ghcr.io/rtfpessoa/roodle:latest
     region: frankfurt
     plan: free
     healthCheckPath: /health

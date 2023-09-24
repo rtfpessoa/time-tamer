@@ -91,3 +91,12 @@ jobs:
         with:
           repo-token: "${{ secrets.GITHUB_TOKEN }}"
           tag: "${{ needs.version.outputs.version }}"
+
+  deploy:
+    runs-on: ubuntu-latest
+    environment: Production
+    needs: [version, build]
+    steps:
+      - name: Deploy service on Render
+        run: |
+          curl -X GET -v "${{ secrets.RENDER_DEPLOY_WEBHOOK }}&imgURL=ghcr.io%2Frtfpessoa%2Froodle%3A${{ needs.version.outputs.version }}"
