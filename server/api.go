@@ -2,9 +2,7 @@ package main
 
 import (
 	"database/sql"
-	"encoding/json"
 	"fmt"
-	"io"
 	"net/http"
 	"reflect"
 	"strings"
@@ -26,13 +24,7 @@ type APIServer struct {
 }
 
 func NewAPIServer(db *sql.DB) APIServer {
-	return APIServer{
-		db: db,
-	}
-}
-
-type response struct {
-	Data interface{} `json:"data"`
+	return APIServer{db: db}
 }
 
 func (a *APIServer) userInfo(ctx *gin.Context, accountID int64) {
@@ -68,13 +60,6 @@ func (a *APIServer) googleCallback(ctx *gin.Context) {
 }
 
 func (a *APIServer) newPoll(ctx *gin.Context, accountID int64) {
-	jsonData, err := io.ReadAll(ctx.Request.Body)
-	if err != nil {
-		logger.Error("failed to read request body", zap.Any("error", err))
-		ctx.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": "invalid request payload"})
-		return
-	}
-
 	pollsNumber, err := CountPolls(ctx, a.db, accountID)
 	if err != nil {
 		logger.Error("failed to retrieve poll count", zap.Any("error", err))
@@ -88,10 +73,9 @@ func (a *APIServer) newPoll(ctx *gin.Context, accountID int64) {
 	}
 
 	poll := Poll{}
-	err = json.Unmarshal(jsonData, &poll)
+	err = readBody(ctx, &poll)
 	if err != nil {
-		logger.Error("failed to parse request body", zap.String("body", string(jsonData)), zap.Any("error", err))
-		ctx.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": "invalid request payload"})
+		ctx.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": "invalid request body"})
 		return
 	}
 
@@ -101,9 +85,7 @@ func (a *APIServer) newPoll(ctx *gin.Context, accountID int64) {
 		return
 	}
 
-	ctx.Status(http.StatusOK)
-	ctx.Header("Content-Type", "application/json")
-	ctx.JSON(200, response{Data: createdPoll})
+	ctx.JSON(http.StatusOK, gin.H{"data": createdPoll})
 }
 
 func (a *APIServer) listPolls(ctx *gin.Context, accountID int64) {
@@ -113,9 +95,7 @@ func (a *APIServer) listPolls(ctx *gin.Context, accountID int64) {
 		return
 	}
 
-	ctx.Status(http.StatusOK)
-	ctx.Header("Content-Type", "application/json")
-	ctx.JSON(200, response{Data: polls})
+	ctx.JSON(http.StatusOK, gin.H{"data": polls})
 }
 
 func (a *APIServer) getPoll(ctx *gin.Context) {
@@ -142,9 +122,7 @@ func (a *APIServer) getPoll(ctx *gin.Context) {
 		return
 	}
 
-	ctx.Status(http.StatusOK)
-	ctx.Header("Content-Type", "application/json")
-	ctx.JSON(200, response{Data: map[string]interface{}{
+	ctx.JSON(http.StatusOK, gin.H{"data": map[string]interface{}{
 		"poll":           poll,
 		"availabilities": availabilities,
 	}})
@@ -164,9 +142,7 @@ func (a *APIServer) deletePoll(ctx *gin.Context, accountID int64) {
 		return
 	}
 
-	ctx.Status(http.StatusOK)
-	ctx.Header("Content-Type", "application/json")
-	ctx.JSON(200, response{Data: poll})
+	ctx.JSON(http.StatusOK, gin.H{"data": poll})
 }
 
 func (a *APIServer) newVote(ctx *gin.Context, accountID int64) {
@@ -177,18 +153,10 @@ func (a *APIServer) newVote(ctx *gin.Context, accountID int64) {
 		return
 	}
 
-	jsonData, err := io.ReadAll(ctx.Request.Body)
-	if err != nil {
-		logger.Error("failed to read request body")
-		ctx.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": "invalid request payload"})
-		return
-	}
-
 	availabilities := []OptionAvailability{}
-	err = json.Unmarshal(jsonData, &availabilities)
+	err := readBody(ctx, &availabilities)
 	if err != nil {
-		logger.Error("failed to parse request body", zap.String("body", string(jsonData)), zap.Any("error", err))
-		ctx.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": "invalid request payload"})
+		ctx.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": "invalid request body"})
 		return
 	}
 
@@ -211,16 +179,13 @@ func (a *APIServer) newVote(ctx *gin.Context, accountID int64) {
 		return
 	}
 
-	ctx.Status(http.StatusOK)
-	ctx.Header("Content-Type", "application/json")
-	ctx.JSON(200, response{Data: pollAccountAvailability})
+	ctx.JSON(http.StatusOK, gin.H{"data": pollAccountAvailability})
 }
 
 func (a *APIServer) getVote(ctx *gin.Context, accountID int64) {
-	pollID := ctx.Params.ByName("id")
-	if pollID == "" {
-		logger.Error("invalid poll id")
-		ctx.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": "invalid poll id"})
+	pollID, err := getPathParam(ctx, "id")
+	if err != nil {
+		ctx.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": "invalid parameter id"})
 		return
 	}
 
@@ -230,7 +195,5 @@ func (a *APIServer) getVote(ctx *gin.Context, accountID int64) {
 		return
 	}
 
-	ctx.Status(http.StatusOK)
-	ctx.Header("Content-Type", "application/json")
-	ctx.JSON(200, response{Data: pollAccountAvailability})
+	ctx.JSON(http.StatusOK, gin.H{"data": pollAccountAvailability})
 }
