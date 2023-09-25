@@ -23,15 +23,17 @@ type APIServer struct {
 	db *sql.DB
 }
 
-func NewAPIServer(db *sql.DB) APIServer {
-	return APIServer{db: db}
+func NewAPIServer(db *sql.DB) *APIServer {
+	return &APIServer{db: db}
 }
 
-func (a *APIServer) userInfo(ctx *gin.Context, accountID int64) {
+func (a *APIServer) UserInfo(ctx *gin.Context) {
 	var (
 		res goauth.Userinfo
 		ok  bool
 	)
+
+	accountID := ctx.Value(ACCOUNT_ID_KEY).(int64)
 
 	if res, ok = ctx.Value("user").(goauth.Userinfo); !ok {
 		logger.Error("failed to retrieve user info")

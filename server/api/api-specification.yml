@@ -1,0 +1,49 @@
+openapi: "3.0.0"
+servers:
+  - url: /api/v1
+info:
+  version: 1.0.0
+paths:
+  /me:
+    get:
+      summary: Returns the authenticated user
+      operationId: UserInfo
+      responses:
+        "200":
+          description: user response
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/User"
+        default:
+          description: unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+
+components:
+  schemas:
+    User:
+      type: object
+      required:
+        - id
+        - email
+      properties:
+        id:
+          type: integer
+          format: int64
+        email:
+          type: string
+
+    Error:
+      type: object
+      required:
+        - code
+        - message
+      properties:
+        code:
+          type: integer
+          format: int32
+        message:
+          type: string

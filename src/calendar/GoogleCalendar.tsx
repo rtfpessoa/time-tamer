@@ -48,7 +48,7 @@ export const GoogleCalendarLink = ({
   }
 
   var queryString = queryParams
-    .map(([name, value]) => `${name}=${encodeURIComponent(value)}`)
+    .map(([name, value]) => `${name}=${encodeURIComponent(value!)}`)
     .join("&");
 
   return (

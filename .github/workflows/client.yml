@@ -15,5 +15,6 @@ jobs:
           node-version: 20.x
           cache: "yarn"
       - run: yarn
+      - run: yarn generate
       - run: yarn build
     # - run: yarn test
