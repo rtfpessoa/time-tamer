@@ -21,7 +21,7 @@
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "react-scripts": "5.0.1",
-    "typescript": "^5.2.2",
+    "typescript": "^5.2.0",
     "web-vitals": "^3.4.0"
   },
   "engines": {
@@ -32,7 +32,7 @@
     "build": "react-scripts build",
     "test": "react-scripts test",
     "eject": "react-scripts eject",
-    "generate": "oazapfts server/api/api-specification.yml src/api.gen.ts -e cors"
+    "generate": "oazapfts ../../modules/api/api-specification.yml src/api.gen.ts -e cors"
   },
   "eslintConfig": {
     "extends": [
@@ -53,6 +53,7 @@
     ]
   },
   "devDependencies": {
+    "@babel/plugin-proposal-private-property-in-object": "^7.21.11",
     "@datadog/browser-rum": "^4.49.0",
     "clipboardy": "^3.0.0",
     "localforage": "^1.10.0",

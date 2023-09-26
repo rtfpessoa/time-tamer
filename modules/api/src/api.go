@@ -9,7 +9,7 @@ import (
 
 	"github.com/gin-contrib/sessions"
 	"github.com/gin-gonic/gin"
-	"github.com/rtfpessoa/roodle/server/logger"
+	"github.com/rtfpessoa/roodle/src/logger"
 	"go.uber.org/zap"
 	"golang.org/x/exp/slices"
 	goauth "google.golang.org/api/oauth2/v2"

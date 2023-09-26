@@ -1,0 +1,33 @@
+name: frontend
+
+on:
+  push:
+    paths:
+      - .github/workflows/frontend.yml
+      - modules/frontend/**
+  pull_request:
+    paths:
+      - .github/workflows/frontend.yml
+      - modules/frontend/**
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: modules/frontend
+    strategy:
+      matrix:
+        node-version: ['18.x']
+
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-node@v3
+        with:
+          node-version: ${{ matrix.node-version }}
+          cache: "yarn"
+          cache-dependency-path: modules/frontend/yarn.lock
+      - run: yarn
+      - run: yarn generate
+      - run: yarn build
+      # - run: yarn test

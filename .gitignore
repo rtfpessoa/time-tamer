@@ -20,10 +20,6 @@
 # Go workspace file
 go.work
 
-/bin/
-/node_modules/
-/resources/
-
 # OpenAPI generated files
 *.gen.go
 *.gen.ts
