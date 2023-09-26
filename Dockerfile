@@ -24,9 +24,13 @@ RUN yarn
 COPY .env .
 COPY tsconfig.json .
 COPY public public
+
+COPY server/api/api-specification.yml server/api/api-specification.yml
+RUN mkdir -p src && \
+  yarn generate
+
 COPY src src
-RUN yarn generate && \
-  yarn build
+RUN yarn build
 
 FROM scratch
 

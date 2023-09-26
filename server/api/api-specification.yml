@@ -15,7 +15,7 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/User"
-        default:
+        "500":
           description: unexpected error
           content:
             application/json:
@@ -39,11 +39,7 @@ components:
     Error:
       type: object
       required:
-        - code
-        - message
+        - error
       properties:
-        code:
-          type: integer
-          format: int32
-        message:
+        error:
           type: string

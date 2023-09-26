@@ -32,7 +32,7 @@
     "build": "react-scripts build",
     "test": "react-scripts test",
     "eject": "react-scripts eject",
-    "generate": "openapi --input server/api/api-specification.yml --output src/api"
+    "generate": "oazapfts server/api/api-specification.yml src/api.gen.ts -e cors"
   },
   "eslintConfig": {
     "extends": [
@@ -58,7 +58,7 @@
     "localforage": "^1.10.0",
     "match-sorter": "^6.3.1",
     "msw": "^1.3.1",
-    "openapi-typescript-codegen": "^0.25.0",
+    "oazapfts": "^4.8.2",
     "react-avatar": "^5.0.3",
     "react-datetime-picker": "^5.5.1",
     "react-router-dom": "^6.16.0",
