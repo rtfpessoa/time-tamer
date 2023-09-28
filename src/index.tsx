@@ -6,6 +6,9 @@ import { datadogRum } from "@datadog/browser-rum";
 
 import "./index.css";
 import "@mantine/core/styles.css";
+import '@mantine/dates/styles.css';
+import '@mantine/ds/styles.css';
+import '@mantine/code-highlight/styles.css';
 
 datadogRum.init({
   applicationId: "3946deb5-0bfd-4d76-af57-3c04904340f4",
