@@ -11,6 +11,8 @@ import {
   Box,
   CopyButton,
 } from "@mantine/core";
+import * as api from "./api.gen";
+import { handle } from "oazapfts";
 
 export function AddIcon(props: React.ComponentPropsWithoutRef<"svg">) {
   const { width, height, style, ...others } = props;
@@ -64,7 +66,32 @@ function PollList() {
   const navigate = useNavigate();
 
   useEffect(() => {
-    listPolls().then((polls) => setPolls(polls));
+    const listPolls = async () => {
+      await handle(api.listPolls(), {
+        200(polls: api.Poll[]) {
+          setPolls(polls.map((poll) => {
+            return {
+              id: poll.id,
+              title: poll.title,
+              description: poll.description,
+              location: poll.location,
+              options: (poll.options || []).map((option) => {
+                return {
+                  id: option.id,
+                  start: new Date(option.start),
+                  end: new Date(option.end),
+                };
+              }),
+            };
+          }));
+        },
+        default(status: number, data: Error) {
+          setPolls([]);
+        },
+      });
+    };
+
+    listPolls();
   }, []);
 
   return (
@@ -135,36 +162,6 @@ function PollList() {
       </Stack>
     </Stack>
   );
-}
-
-async function listPolls(): Promise<Poll[]> {
-  var response = await fetch("/api/v1/poll", {
-    method: "GET",
-    headers: {
-      "Content-Type": "application/json",
-    },
-  });
-
-  if (!response.ok) {
-    return [];
-  }
-
-  const polls: PollListResponse = await response.json();
-  return polls.data.map((poll) => {
-    return {
-      id: poll.id,
-      title: poll.title,
-      description: poll.description,
-      location: poll.location,
-      options: poll.options.map((option) => {
-        return {
-          id: option.id,
-          start: new Date(option.start),
-          end: new Date(option.end),
-        };
-      }),
-    };
-  });
 }
 
 export default PollList;

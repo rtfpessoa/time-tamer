@@ -285,39 +285,37 @@ export const handlers = [
     const date2E = new Date();
     date2E.setHours(4, 0, 0, 0);
     return res(
-      ctx.json({
-        data: [
-          {
-            id: "asdas8d7asn",
-            options: [
-              {
-                id: "ojhbgd6d98",
-                start: date1S,
-                end: date1E,
-              },
-            ],
-          },
-          {
-            id: "asasasa",
-            title: "My nice title",
-            description:
-              "Such a great and nice description for my amazing event",
-            location: "Machado's house",
-            options: [
-              {
-                id: "bhjgh675",
-                start: date1S,
-                end: date1E,
-              },
-              {
-                id: "assass06",
-                start: date2S,
-                end: date2E,
-              },
-            ],
-          },
-        ],
-      })
+      ctx.json([
+        {
+          id: "asdas8d7asn",
+          options: [
+            {
+              id: "ojhbgd6d98",
+              start: date1S,
+              end: date1E,
+            },
+          ],
+        },
+        {
+          id: "asasasa",
+          title: "My nice title",
+          description:
+            "Such a great and nice description for my amazing event",
+          location: "Machado's house",
+          options: [
+            {
+              id: "bhjgh675",
+              start: date1S,
+              end: date1E,
+            },
+            {
+              id: "assass06",
+              start: date2S,
+              end: date2E,
+            },
+          ],
+        },
+      ])
     );
   }),
 ];
