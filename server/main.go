@@ -250,23 +250,3 @@ func AuthMiddleware(db *sql.DB) func(ctx *gin.Context) {
 		ctx.Next()
 	}
 }
-
-func WithAccountID(handler func(*gin.Context, int64)) func(*gin.Context) {
-	return func(ctx *gin.Context) {
-		value := ctx.Value(ACCOUNT_ID_KEY)
-		if value == nil {
-			logger.Error("missing account id")
-			ctx.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"error": "An unexpected error occurred"})
-			return
-		}
-
-		if accountID, ok := value.(int64); ok {
-			handler(ctx, accountID)
-			return
-		}
-
-		logger.Error("invalid account id")
-		ctx.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"error": "An unexpected error occurred"})
-		return
-	}
-}
