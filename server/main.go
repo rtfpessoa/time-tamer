@@ -14,6 +14,7 @@ import (
 
 	"github.com/gin-contrib/sessions"
 	"github.com/gin-gonic/gin"
+	"github.com/rtfpessoa/roodle/server/api"
 	"github.com/rtfpessoa/roodle/server/logger"
 	"go.uber.org/zap"
 
@@ -121,13 +122,17 @@ func StartServer() error {
 	apiV1Router := router.Group("/api")
 	apiV1Router.Use(Auth())
 	apiV1Router.Use(AuthMiddleware(db))
-	apiV1Router.GET("/v1/me", WithAccountID(apiServer.userInfo))
 	apiV1Router.GET("/v1/poll", WithAccountID(apiServer.listPolls))
 	apiV1Router.POST("/v1/poll", WithAccountID(apiServer.newPoll))
 	apiV1Router.GET("/v1/poll/:id", apiServer.getPoll)
 	apiV1Router.DELETE("/v1/poll/:id", WithAccountID(apiServer.deletePoll))
 	apiV1Router.POST("/v1/poll/:id/vote", WithAccountID(apiServer.newVote))
 	apiV1Router.GET("/v1/poll/:id/vote", WithAccountID(apiServer.getVote))
+
+	api.RegisterHandlersWithOptions(router, apiServer, api.GinServerOptions{
+		BaseURL:     "/api/v1",
+		Middlewares: []api.MiddlewareFunc{Auth(), AuthMiddleware(db)},
+	})
 
 	port := os.Getenv("PORT")
 	if port == "" {
@@ -192,7 +197,7 @@ const ACCOUNT_ID_KEY = "ACCOUNT_ID"
 
 const SESSION_ACCOUNT_ID = "roodle-user"
 
-func AuthMiddleware(db *sql.DB) gin.HandlerFunc {
+func AuthMiddleware(db *sql.DB) func(ctx *gin.Context) {
 	return func(ctx *gin.Context) {
 		session := sessions.Default(ctx)
 
@@ -243,25 +248,5 @@ func AuthMiddleware(db *sql.DB) gin.HandlerFunc {
 		}
 
 		ctx.Next()
-	}
-}
-
-func WithAccountID(handler func(*gin.Context, int64)) func(*gin.Context) {
-	return func(ctx *gin.Context) {
-		value := ctx.Value(ACCOUNT_ID_KEY)
-		if value == nil {
-			logger.Error("missing account id")
-			ctx.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"error": "An unexpected error occurred"})
-			return
-		}
-
-		if accountID, ok := value.(int64); ok {
-			handler(ctx, accountID)
-			return
-		}
-
-		logger.Error("invalid account id")
-		ctx.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"error": "An unexpected error occurred"})
-		return
 	}
 }

@@ -24,7 +24,7 @@ export const GoogleCalendarLink = ({
   Location,
   Guests,
 }: GoogleCalendarLinkProps) => {
-  var queryParams = [];
+  var queryParams = new Array<[key: string, value: string]>();
   queryParams.push(["action", "TEMPLATE"]);
   queryParams.push(["text", Title]);
   if (Description) {

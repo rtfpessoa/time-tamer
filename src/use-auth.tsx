@@ -2,6 +2,9 @@ import { Box, Button, Stack, Title } from "@mantine/core";
 import React, { ReactNode } from "react";
 import { useState, useEffect } from "react";
 import { useLocation } from "react-router-dom";
+import * as api from "./api.gen";
+import { handle } from "oazapfts";
+
 
 type Account = {
   id: number;
@@ -29,16 +32,16 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
 
     const fetchAccount = async () => {
-      const response = await fetch("/api/v1/me");
-      if (!response.ok) {
-        setAccount(null);
-        setLoading(false);
-        return;
-      }
-
-      const account = await response.json();
-      setAccount(account);
-      setLoading(false);
+      await handle(api.userInfo(), {
+        200(user: api.User) {
+          setAccount(user);
+          setLoading(false);
+        },
+        default(status: number, data: Error) {
+          setAccount(null);
+          setLoading(false);
+        },
+      });
     };
 
     fetchAccount();

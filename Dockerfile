@@ -8,6 +8,7 @@ RUN go mod download
 
 COPY server server
 RUN mkdir -p ./bin && \
+  go generate -v ./... && \
   go build -v -o ./bin -ldflags="-s -w" ./...
 
 RUN chmod +x ./bin/server
@@ -23,6 +24,11 @@ RUN yarn
 COPY .env .
 COPY tsconfig.json .
 COPY public public
+
+COPY server/api/api-specification.yml server/api/api-specification.yml
+RUN mkdir -p src && \
+  yarn generate
+
 COPY src src
 RUN yarn build
 

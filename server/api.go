@@ -23,23 +23,25 @@ type APIServer struct {
 	db *sql.DB
 }
 
-func NewAPIServer(db *sql.DB) APIServer {
-	return APIServer{db: db}
+func NewAPIServer(db *sql.DB) *APIServer {
+	return &APIServer{db: db}
 }
 
-func (a *APIServer) userInfo(ctx *gin.Context, accountID int64) {
-	var (
-		res goauth.Userinfo
-		ok  bool
-	)
+func (a *APIServer) UserInfo(ctx *gin.Context) {
+	WithAccountID(func(ctx *gin.Context, accountID int64) {
+		var (
+			res goauth.Userinfo
+			ok  bool
+		)
 
-	if res, ok = ctx.Value("user").(goauth.Userinfo); !ok {
-		logger.Error("failed to retrieve user info")
-		ctx.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"error": "failed to retrieve user info"})
-		return
-	}
+		if res, ok = ctx.Value("user").(goauth.Userinfo); !ok {
+			logger.Error("failed to retrieve user info")
+			ctx.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"error": "failed to retrieve user info"})
+			return
+		}
 
-	ctx.JSON(http.StatusOK, gin.H{"id": accountID, "email": res.Email})
+		ctx.JSON(http.StatusOK, gin.H{"id": accountID, "email": res.Email})
+	})(ctx)
 }
 
 func (a *APIServer) googleCallback(ctx *gin.Context) {
@@ -196,4 +198,24 @@ func (a *APIServer) getVote(ctx *gin.Context, accountID int64) {
 	}
 
 	ctx.JSON(http.StatusOK, gin.H{"data": pollAccountAvailability})
+}
+
+func WithAccountID(handler func(*gin.Context, int64)) func(*gin.Context) {
+	return func(ctx *gin.Context) {
+		value := ctx.Value(ACCOUNT_ID_KEY)
+		if value == nil {
+			logger.Error("missing account id")
+			ctx.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"error": "An unexpected error occurred"})
+			return
+		}
+
+		if accountID, ok := value.(int64); ok {
+			handler(ctx, accountID)
+			return
+		}
+
+		logger.Error("invalid account id")
+		ctx.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"error": "An unexpected error occurred"})
+		return
+	}
 }
