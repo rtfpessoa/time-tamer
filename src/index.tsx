@@ -15,7 +15,7 @@ datadogRum.init({
   clientToken: "pub6b8c573520c7b6b090e1b91d4e9ca41c",
   site: "datadoghq.eu",
   service: "roodle-ui",
-  env: "prod",
+  env: process.env.NODE_ENV,
   // Specify a version number to identify the deployed version of your application in Datadog
   // version: '1.0.0',
   sessionSampleRate: 100,
