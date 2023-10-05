@@ -1,35 +1,37 @@
 FROM golang:1.21-alpine as build-go
 
-WORKDIR /app
+WORKDIR /modules/api
 
-COPY go.mod .
-COPY go.sum .
+COPY modules/api/go.mod .
+COPY modules/api/go.sum .
 RUN go mod download
 
-COPY server server
+COPY modules/api/api-specification.yml .
+RUN go generate -v ./...
+
+COPY modules/api/src src
 RUN mkdir -p ./bin && \
-  go generate -v ./... && \
   go build -v -o ./bin -ldflags="-s -w" ./...
 
-RUN chmod +x ./bin/server
+RUN chmod +x ./bin/src
 
 FROM node:20-alpine as build-js
 
-WORKDIR /app
+WORKDIR /modules/frontend
 
-COPY package.json .
-COPY yarn.lock .
+COPY modules/frontend/package.json .
+COPY modules/frontend/yarn.lock .
 RUN yarn
 
-COPY .env .
-COPY tsconfig.json .
-COPY public public
+COPY modules/frontend/.env .
+COPY modules/frontend/tsconfig.json .
+COPY modules/frontend/public public
 
-COPY server/api/api-specification.yml server/api/api-specification.yml
+COPY modules/api/api-specification.yml /modules/api/api-specification.yml
 RUN mkdir -p src && \
   yarn generate
 
-COPY src src
+COPY modules/frontend/src src
 RUN yarn build
 
 FROM scratch
@@ -40,8 +42,8 @@ LABEL org.opencontainers.image.licenses=MIT
 
 WORKDIR /app
 
-COPY --from=build-go --chmod=0777 /app/bin/server /app/bin/server
+COPY --from=build-go --chmod=0777 /modules/api/bin/src /app/bin/server
 COPY --from=build-go /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/
-COPY --from=build-js /app/resources /app/resources
+COPY --from=build-js /modules/frontend/resources /app/resources
 
 ENTRYPOINT [ "/app/bin/server" ]

@@ -6,7 +6,7 @@ import (
 	"io"
 
 	"github.com/gin-gonic/gin"
-	"github.com/rtfpessoa/roodle/server/logger"
+	"github.com/rtfpessoa/roodle/src/logger"
 	"go.uber.org/zap"
 )
 

@@ -8,7 +8,7 @@ import (
 	"os"
 
 	_ "github.com/lib/pq"
-	"github.com/rtfpessoa/roodle/server/logger"
+	"github.com/rtfpessoa/roodle/src/logger"
 	"go.uber.org/zap"
 )
 
