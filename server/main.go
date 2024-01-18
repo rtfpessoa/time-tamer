@@ -17,6 +17,9 @@ import (
 	"github.com/rtfpessoa/roodle/server/api"
 	"github.com/rtfpessoa/roodle/server/logger"
 	"go.uber.org/zap"
+	gintrace "gopkg.in/DataDog/dd-trace-go.v1/contrib/gin-gonic/gin"
+	"gopkg.in/DataDog/dd-trace-go.v1/ddtrace/tracer"
+	"gopkg.in/DataDog/dd-trace-go.v1/profiler"
 
 	goauth "google.golang.org/api/oauth2/v2"
 )
@@ -40,10 +43,29 @@ func init() {
 }
 
 func main() {
-	ConfigRuntime()
-	err := StartServer()
+	tracer.Start()
+	defer tracer.Stop()
+
+	err := profiler.Start(
+		profiler.WithProfileTypes(
+			profiler.CPUProfile,
+			profiler.HeapProfile,
+			profiler.BlockProfile,
+			profiler.MutexProfile,
+			profiler.GoroutineProfile,
+			profiler.MetricsProfile,
+		),
+		profiler.WithLogStartup(true),
+	)
 	if err != nil {
-		logger.Error("server failed", zap.Error(err))
+		logger.Fatal("Failed to start Datadog profiler", zap.Error(err))
+	}
+	defer profiler.Stop()
+
+	ConfigRuntime()
+	err = StartServer()
+	if err != nil {
+		logger.Fatal("Failed to start api server", zap.Error(err))
 	}
 }
 
@@ -115,6 +137,7 @@ func StartServer() error {
 	router.GET("/logout", LogoutHandler)
 
 	authRouter := router.Group("/auth")
+	router.Use(gintrace.Middleware(""))
 	authRouter.Use(Auth())
 	authRouter.Use(AuthMiddleware(db))
 	authRouter.GET("/google/callback", apiServer.googleCallback)

@@ -7,13 +7,21 @@ import (
 	"errors"
 	"os"
 
+	sqltrace "gopkg.in/DataDog/dd-trace-go.v1/contrib/database/sql"
+	"gopkg.in/DataDog/dd-trace-go.v1/ddtrace/tracer"
+
+	"github.com/lib/pq"
 	_ "github.com/lib/pq"
 	"github.com/rtfpessoa/roodle/server/logger"
 	"go.uber.org/zap"
 )
 
+func init() {
+	sqltrace.Register("pq", &pq.Driver{}, sqltrace.WithDBMPropagation(tracer.DBMPropagationModeFull))
+}
+
 func NewDB(ctx context.Context) (*sql.DB, error) {
-	sqlDB, err := sql.Open("postgres", os.Getenv("DATABASE_URL")+"&application_name=roodle")
+	sqlDB, err := sqltrace.Open("postgres", os.Getenv("DATABASE_URL")+"&application_name=roodle")
 	if err != nil {
 		logger.Error("failed to open database connection", zap.Error(err))
 		return nil, err

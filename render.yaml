@@ -16,3 +16,5 @@ services:
         sync: false
       - key: COOKIE_SECRET
         sync: false
+      - key: DD_API_KEY
+        sync: false
