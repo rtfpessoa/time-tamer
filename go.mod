@@ -4,6 +4,7 @@ module github.com/rtfpessoa/roodle
 go 1.20
 
 require (
+	github.com/deepmap/oapi-codegen v1.16.2
 	github.com/gin-gonic/gin v1.9.1
 	github.com/lib/pq v1.10.9
 	gopkg.in/DataDog/dd-trace-go.v1 v1.59.0
@@ -21,7 +22,6 @@ require (
 	github.com/Microsoft/go-winio v0.6.1 // indirect
 	github.com/cespare/xxhash/v2 v2.2.0 // indirect
 	github.com/chenzhuoyu/iasm v0.9.0 // indirect
-	github.com/deepmap/oapi-codegen v1.16.2 // indirect
 	github.com/dustin/go-humanize v1.0.1 // indirect
 	github.com/ebitengine/purego v0.5.0 // indirect
 	github.com/getkin/kin-openapi v0.118.0 // indirect
