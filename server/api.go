@@ -90,14 +90,16 @@ func (a *APIServer) newPoll(ctx *gin.Context, accountID int64) {
 	ctx.JSON(http.StatusOK, gin.H{"data": createdPoll})
 }
 
-func (a *APIServer) listPolls(ctx *gin.Context, accountID int64) {
-	polls, err := ListPolls(ctx, a.db, accountID)
-	if err != nil {
-		ctx.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"error": "An unexpected error occurred"})
-		return
-	}
+func (a *APIServer) ListPolls(ctx *gin.Context) {
+	WithAccountID(func(ctx *gin.Context, accountID int64) {
+		polls, err := ListPolls(ctx, a.db, accountID)
+		if err != nil {
+			ctx.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"error": "An unexpected error occurred"})
+			return
+		}
 
-	ctx.JSON(http.StatusOK, gin.H{"data": polls})
+		ctx.JSON(http.StatusOK, polls)
+	})(ctx)
 }
 
 func (a *APIServer) getPoll(ctx *gin.Context) {

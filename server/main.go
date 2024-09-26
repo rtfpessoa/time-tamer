@@ -145,7 +145,6 @@ func StartServer() error {
 	apiV1Router := router.Group("/api")
 	apiV1Router.Use(Auth())
 	apiV1Router.Use(AuthMiddleware(db))
-	apiV1Router.GET("/v1/poll", WithAccountID(apiServer.listPolls))
 	apiV1Router.POST("/v1/poll", WithAccountID(apiServer.newPoll))
 	apiV1Router.GET("/v1/poll/:id", apiServer.getPoll)
 	apiV1Router.DELETE("/v1/poll/:id", WithAccountID(apiServer.deletePoll))
